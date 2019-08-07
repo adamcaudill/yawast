@@ -6,7 +6,7 @@ cffi==1.12.3
 chardet==3.0.4
 colorama==0.4.1
 coverage==4.5.3
-cryptography==2.5
+cryptography==2.7
 cx-Freeze==5.1.1
 dnspython==1.16.0
 idna==2.8
