@@ -10,7 +10,7 @@ cryptography==2.5
 cx-Freeze==5.1.1
 dnspython==1.16.0
 idna==2.8
-jsonschema==3.0.1
+jsonschema==3.0.2
 mypy==0.720
 mypy-extensions==0.4.1
 nassl==2.2.0
