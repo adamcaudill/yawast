@@ -10,7 +10,7 @@ cryptography==2.5
 cx-Freeze==5.1.1
 dnspython==1.16.0
 idna==2.8
-jsonschema==2.6.0
+jsonschema==3.0.2
 nassl==2.2.0
 packaging==19.1
 psutil==5.6.3
