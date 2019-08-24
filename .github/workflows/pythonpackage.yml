@@ -37,12 +37,12 @@ jobs:
         pipenv sync --dev
     - name: Test with unittest
       run: |
-        python -m unittest discover
+        pipenv run python -m unittest discover
     - name: Build packages
       run: |
-        python setup.py sdist
-        python setup.py bdist_wheel
+        pipenv run python setup.py sdist
+        pipenv run python setup.py bdist_wheel
     - name: Build Windows EXE
       if: runner.os == 'Windows'
       run: |
-        python setup.py build_exe
+        pipenv run python setup.py build_exe
