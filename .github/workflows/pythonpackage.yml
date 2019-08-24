@@ -17,27 +17,62 @@ jobs:
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: echo "$GITHUB_CONTEXT"
+
     - name: Debug Info - Job
       env:
         JOB_CONTEXT: ${{ toJson(job) }}
       run: echo "$JOB_CONTEXT"
+
     - name: Debug Info - Runner
       env:
         RUNNER_CONTEXT: ${{ toJson(runner) }}
       run: echo "$RUNNER_CONTEXT"
+
     - uses: actions/checkout@v1
+
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
+
+    - name: Setup Selenium (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          SET PATH=ChromeWebDriver;%PATH%
+
+    - name: Setup Selenium (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          CHROME_STRING=$(/usr/bin/google-chrome-stable --version) \
+            && CHROME_VERSION_STRING=$(echo "${CHROME_STRING}" | grep -oP "\d+\.\d+\.\d+\.\d+") \
+            && CHROME_MAJOR_VERSION=$(echo "${CHROME_VERSION_STRING%%.*}") \
+            && wget --no-verbose -O /tmp/LATEST_RELEASE "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}" \
+            && CD_VERSION=$(cat "/tmp/LATEST_RELEASE") \
+            && rm /tmp/LATEST_RELEASE \
+            && CHROME_DRIVER_VERSION="${CD_VERSION}" \
+            && echo "Using chromedriver version: "$CD_VERSION \
+            && echo "Using Chrome version:       "$CHROME_VERSION_STRING \
+            && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CD_VERSION/chromedriver_linux64.zip \
+            && unzip /tmp/chromedriver_linux64.zip -d /usr/bin/ \
+            && rm /tmp/chromedriver_linux64.zip \
+            && chmod +x /usr/bin/chromedriver
+
+    - name: Setup Selenium (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew tap homebrew/cask
+          brew cask install chromedriver
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade pipenv
         pipenv sync --dev
+
     - name: Test with unittest
       run: |
         pipenv run python -m unittest discover
+
     - name: Run code coverage
       if: runner.os == 'Linux'
       run: |
@@ -48,10 +83,12 @@ jobs:
         pipenv run coverage run -m unittest discover
         pipenv run coverage xml
         ./cc-test-reporter after-build
+
     - name: Build packages
       run: |
         pipenv run python setup.py sdist
         pipenv run python setup.py bdist_wheel
+
     - name: Build Windows EXE
       if: runner.os == 'Windows'
       run: |
@@ -61,7 +98,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - uses: actions/checkout@v1
+
     - name: Build the Docker image
       if: github.ref != 'refs/heads/master'
       run: docker build . --file Dockerfile --tag yawast-ci:$(date +%s)
