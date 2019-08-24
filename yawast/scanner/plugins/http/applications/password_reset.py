@@ -7,6 +7,7 @@ import time
 from typing import List, Optional, Dict, Union, Tuple
 
 from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
 from yawast.reporting.enums import Vulnerabilities
@@ -116,10 +117,7 @@ def check_resp_user_enum(
     return results
 
 
-def _fill_form_get_body(
-    session: Session, uri: str, user: str, element_name: Optional[str] = None
-) -> Tuple[str, str, int]:
-
+def _get_driver(session: Session, uri: str) -> WebDriver:
     options = webdriver.ChromeOptions()
     options.add_argument("headless")
     options.add_argument("incognito")
@@ -141,6 +139,14 @@ def _fill_form_get_body(
 
     driver = webdriver.Chrome(chrome_options=options, desired_capabilities=caps)
     driver.get(uri)
+
+    return driver
+
+
+def _fill_form_get_body(
+    session: Session, uri: str, user: str, element_name: Optional[str] = None
+) -> Tuple[str, str, int]:
+    driver = _get_driver(session, uri)
 
     # find the page form element - this is going to be a best effort thing, and may not always be right
     element = _find_user_field(driver, element_name)
