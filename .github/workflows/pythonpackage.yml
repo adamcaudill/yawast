@@ -36,12 +36,12 @@ jobs:
     - name: Setup Selenium (Windows)
       if: runner.os == 'Windows'
       run: |
-        SET PATH=ChromeWebDriver;%PATH%
+        SET PATH=%ChromeWebDriver%;%PATH%
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
       run: |
-        export PATH=./;$PATH
+        export PATH=./chromedriver;$PATH
         CHROME_STRING=$(/usr/bin/google-chrome-stable --version) \
           && CHROME_VERSION_STRING=$(echo "${CHROME_STRING}" | grep -oP "\d+\.\d+\.\d+\.\d+") \
           && CHROME_MAJOR_VERSION=$(echo "${CHROME_VERSION_STRING%%.*}") \
