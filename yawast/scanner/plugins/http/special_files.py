@@ -39,8 +39,12 @@ def check_special_paths(url: str) -> Tuple[List[str], List[Result]]:
         ".svn/entries",
         ".svn/wc.db",
         ".hg/",
+        ".hg/dirstate",
         ".svn/",
+        ".svn/entries",
+        ".svn/wc.db",
         ".bzr/",
+        ".bzr/checkout/dirstate",
         ".cvs/",
     ]
 
