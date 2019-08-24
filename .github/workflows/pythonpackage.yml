@@ -38,6 +38,16 @@ jobs:
     - name: Test with unittest
       run: |
         pipenv run python -m unittest discover
+    - name: Run code coverage
+      if: runner.os == 'Linux'
+      run: |
+        export CC_TEST_REPORTER_ID=6fd9c710b9a6e0da2011c62b81075b9bd620200a2a400f4dbeab9c88829f4cb6
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
+        pipenv run coverage run -m unittest discover
+        pipenv run coverage xml
+        ./cc-test-reporter after-build
     - name: Build packages
       run: |
         pipenv run python setup.py sdist
