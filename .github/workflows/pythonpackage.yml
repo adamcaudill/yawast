@@ -48,14 +48,10 @@ jobs:
         pipenv run python setup.py build_exe
 
   build-docker:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+    runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
       if: github.ref != 'refs/heads/master'
-      run: docker build . --file Dockerfile --tag yawast-ci
+      run: docker build . --file Dockerfile --tag yawast-ci:$(date +%s)
