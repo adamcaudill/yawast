@@ -18,10 +18,8 @@ jobs:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: echo "$GITHUB_CONTEXT"
 
-    - name: Debug Info - Job
-      env:
-        JOB_CONTEXT: ${{ toJson(job) }}
-      run: echo "$JOB_CONTEXT"
+    - name: Debug Info - Env
+      run: set
 
     - name: Debug Info - Runner
       env:
@@ -43,6 +41,7 @@ jobs:
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
       run: |
+        export PATH=./;$PATH
         CHROME_STRING=$(/usr/bin/google-chrome-stable --version) \
           && CHROME_VERSION_STRING=$(echo "${CHROME_STRING}" | grep -oP "\d+\.\d+\.\d+\.\d+") \
           && CHROME_MAJOR_VERSION=$(echo "${CHROME_VERSION_STRING%%.*}") \
