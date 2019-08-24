@@ -48,10 +48,9 @@ jobs:
         pipenv run python setup.py build_exe
 
   build-docker:
-    if: github.ref != 'refs/heads/master'
-
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
+      if: github.ref != 'refs/heads/master'
       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
