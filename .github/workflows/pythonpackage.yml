@@ -36,32 +36,32 @@ jobs:
         python-version: 3.7
 
     - name: Setup Selenium (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          SET PATH=ChromeWebDriver;%PATH%
+      if: runner.os == 'Windows'
+      run: |
+        SET PATH=ChromeWebDriver;%PATH%
 
     - name: Setup Selenium (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          CHROME_STRING=$(/usr/bin/google-chrome-stable --version) \
-            && CHROME_VERSION_STRING=$(echo "${CHROME_STRING}" | grep -oP "\d+\.\d+\.\d+\.\d+") \
-            && CHROME_MAJOR_VERSION=$(echo "${CHROME_VERSION_STRING%%.*}") \
-            && wget --no-verbose -O /tmp/LATEST_RELEASE "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}" \
-            && CD_VERSION=$(cat "/tmp/LATEST_RELEASE") \
-            && rm /tmp/LATEST_RELEASE \
-            && CHROME_DRIVER_VERSION="${CD_VERSION}" \
-            && echo "Using chromedriver version: "$CD_VERSION \
-            && echo "Using Chrome version:       "$CHROME_VERSION_STRING \
-            && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CD_VERSION/chromedriver_linux64.zip \
-            && unzip /tmp/chromedriver_linux64.zip -d /usr/bin/ \
-            && rm /tmp/chromedriver_linux64.zip \
-            && chmod +x /usr/bin/chromedriver
+      if: runner.os == 'Linux'
+      run: |
+        CHROME_STRING=$(/usr/bin/google-chrome-stable --version) \
+          && CHROME_VERSION_STRING=$(echo "${CHROME_STRING}" | grep -oP "\d+\.\d+\.\d+\.\d+") \
+          && CHROME_MAJOR_VERSION=$(echo "${CHROME_VERSION_STRING%%.*}") \
+          && wget --no-verbose -O /tmp/LATEST_RELEASE "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}" \
+          && CD_VERSION=$(cat "/tmp/LATEST_RELEASE") \
+          && rm /tmp/LATEST_RELEASE \
+          && CHROME_DRIVER_VERSION="${CD_VERSION}" \
+          && echo "Using chromedriver version: "$CD_VERSION \
+          && echo "Using Chrome version:       "$CHROME_VERSION_STRING \
+          && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CD_VERSION/chromedriver_linux64.zip \
+          && unzip /tmp/chromedriver_linux64.zip -d /usr/bin/ \
+          && rm /tmp/chromedriver_linux64.zip \
+          && chmod +x /usr/bin/chromedriver
 
     - name: Setup Selenium (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew tap homebrew/cask
-          brew cask install chromedriver
+      if: runner.os == 'macOS'
+      run: |
+        brew tap homebrew/cask
+        brew cask install chromedriver
 
     - name: Install dependencies
       run: |
