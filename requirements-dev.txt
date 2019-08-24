@@ -13,6 +13,7 @@ first==2.0.2
 git+https://github.com/anthony-tuininga/cx_Freeze.git@7f0ceefa89ab48896bb28c8f57c0e550b338d9d8#egg=cx-freeze
 idna==2.8
 importlib-metadata==0.19
+more-itertools==7.2.0
 mypy-extensions==0.4.1
 mypy==0.720
 orderedmultidict==1.0.1
@@ -31,5 +32,5 @@ typed-ast==1.4.0
 typing-extensions==3.7.4
 urllib3==1.25.3
 vistir==0.4.3
-wheel==0.33.4
-zipp==0.5.2
+wheel==0.33.6
+zipp==0.6.0
