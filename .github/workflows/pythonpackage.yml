@@ -62,13 +62,7 @@ jobs:
           && unzip ./chromedriver_linux64.zip -d ./ \
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
-        export PATH="/home/runner/work/yawast/yawast:$PATH"
-        echo 'export PATH="/home/runner/work/yawast/yawast:$PATH"' > ~/.bash_profile
-        cat ~/.bash_profile
-        echo $PATH
-        which chromedriver
-        pipenv run echo $PATH
-        pipenv run which chromedriver
+        echo 'export PATH="/home/runner/work/yawast/yawast:$PATH"' >> ~/.bashrc && source ~/.bashrc
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
