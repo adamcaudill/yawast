@@ -48,6 +48,7 @@ jobs:
         echo "PATH=%PATH%" > .env
         pipenv run echo %PATH%
         pipenv run where chromedriver
+        copy %ChromeWebDriver%\chromedriver.exe C:\Users\runneradmin\.dotnet\tools
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
@@ -70,6 +71,7 @@ jobs:
         which chromedriver
         pipenv run echo $PATH
         pipenv run which chromedriver
+        cp ./chromedriver /usr/local/bin
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
