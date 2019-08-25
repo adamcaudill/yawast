@@ -73,7 +73,8 @@ jobs:
 
     - name: Test with unittest
       run: |
-        pipenv run python -m unittest discover
+          pipenv run python -m unittest discover
+      shell: bash {0}
 
     - name: Run code coverage
       if: runner.os == 'Linux'
@@ -85,6 +86,7 @@ jobs:
         pipenv run coverage run -m unittest discover
         pipenv run coverage xml
         ./cc-test-reporter after-build
+      shell: bash {0}
 
     - name: Build packages
       run: |
