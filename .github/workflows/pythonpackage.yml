@@ -43,6 +43,7 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         choco install chromedriver
+        choco install googlechrome
         pipenv run echo %PATH%
         pipenv run where chromedriver
 
