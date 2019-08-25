@@ -33,12 +33,18 @@ jobs:
       with:
         python-version: 3.7
 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade pipenv
+        pipenv sync --dev
+
     - name: Setup Selenium (Windows)
       if: runner.os == 'Windows'
       run: |
-        SET PATH=%ChromeWebDriver%;%PATH%
-        echo %PATH%
-        where chromedriver.exe
+        pipenv run SET PATH=%ChromeWebDriver%;%PATH%
+        pipenv run echo %PATH%
+        pipenv run where chromedriver.exe
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
@@ -56,7 +62,7 @@ jobs:
           && unzip ./chromedriver_linux64.zip -d ./ \
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
-        export PATH=`pwd`;$PATH
+        pipenv run export PATH="/home/runner/work/yawast/yawast;$PATH"
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
@@ -64,12 +70,6 @@ jobs:
         brew tap homebrew/cask
         brew cask install chromedriver
         brew cask install google-chrome
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade pipenv
-        pipenv sync --dev
 
     - name: Test with unittest
       run: |
