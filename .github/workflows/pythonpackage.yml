@@ -42,9 +42,7 @@ jobs:
     - name: Setup Selenium (Windows)
       if: runner.os == 'Windows'
       run: |
-        wmic product where "name like 'Google Chrome'" call uninstall /nointeractive
-        choco install chromedriver
-        choco install googlechrome
+        choco install chromedriver --version 75.0.3770.1400
         pipenv run echo %PATH%
         pipenv run where chromedriver
 
@@ -65,7 +63,8 @@ jobs:
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
         export PATH="/home/runner/work/yawast/yawast:$PATH"
-        echo 'export PATH="/home/runner/work/yawast/yawast:$PATH"' > ~/.profile
+        echo 'export PATH="/home/runner/work/yawast/yawast:$PATH"' > ~/.bash_profile
+        cat ~/.bash_profile
         echo $PATH
         which chromedriver
         pipenv run echo $PATH
