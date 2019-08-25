@@ -45,6 +45,7 @@ jobs:
         SET PATH=%ChromeWebDriver%;%PATH%
         echo %PATH%
         where chromedriver.exe
+        echo "PATH=%PATH%" > .env
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
@@ -63,6 +64,9 @@ jobs:
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
         export PATH="/home/runner/work/yawast/yawast;$PATH"
+        echo $PATH
+        which chromedriver
+        echo "PATH=$PATH" > .env
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
