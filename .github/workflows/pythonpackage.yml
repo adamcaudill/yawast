@@ -42,9 +42,9 @@ jobs:
     - name: Setup Selenium (Windows)
       if: runner.os == 'Windows'
       run: |
-        pipenv run SET PATH=%ChromeWebDriver%;%PATH%
-        pipenv run echo %PATH%
-        pipenv run where chromedriver.exe
+        pipenv shell SET PATH=%ChromeWebDriver%;%PATH%
+        pipenv shell echo %PATH%
+        pipenv shell where chromedriver.exe
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
@@ -62,7 +62,7 @@ jobs:
           && unzip ./chromedriver_linux64.zip -d ./ \
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
-        pipenv run export PATH="/home/runner/work/yawast/yawast;$PATH"
+        pipenv shell export PATH="/home/runner/work/yawast/yawast;$PATH"
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
