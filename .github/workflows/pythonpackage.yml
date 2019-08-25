@@ -46,6 +46,8 @@ jobs:
         echo %PATH%
         where chromedriver.exe
         echo "PATH=%PATH%" > .env
+        pipenv run echo %PATH%
+        pipenv run where chromedriver
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
@@ -66,6 +68,8 @@ jobs:
         export PATH="/home/runner/work/yawast/yawast:$PATH"
         echo $PATH
         which chromedriver
+        pipenv run echo $PATH
+        pipenv run which chromedriver
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
