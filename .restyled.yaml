@@ -1,0 +1,12 @@
+enabled: true
+auto: true
+pull_requests: true
+comments: true
+statuses:
+  differences: true
+  no_differences: true
+  error: false
+restylers:
+  - astyle
+  - black
+restylers_version: "20190821"
