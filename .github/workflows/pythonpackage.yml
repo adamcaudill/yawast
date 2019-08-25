@@ -37,11 +37,11 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         SET PATH=%ChromeWebDriver%;%PATH%
+        echo %PATH%
 
     - name: Setup Selenium (Linux)
       if: runner.os == 'Linux'
       run: |
-        export PATH=./chromedriver;$PATH
         CHROME_STRING=$(/usr/bin/google-chrome-stable --version) \
           && CHROME_VERSION_STRING=$(echo "${CHROME_STRING}" | grep -oP "\d+\.\d+\.\d+\.\d+") \
           && CHROME_MAJOR_VERSION=$(echo "${CHROME_VERSION_STRING%%.*}") \
@@ -55,6 +55,7 @@ jobs:
           && unzip ./chromedriver_linux64.zip -d ./ \
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
+        export PATH=./chromedriver;$PATH
 
     - name: Setup Selenium (macOS)
       if: runner.os == 'macOS'
