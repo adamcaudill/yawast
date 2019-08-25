@@ -63,8 +63,8 @@ jobs:
           && rm ./chromedriver_linux64.zip \
           && chmod +x ./chromedriver
         echo 'export PATH="/home/runner/work/yawast/yawast:$PATH"' >> ~/.bashrc
+        echo 'PATH="/home/runner/work/yawast/yawast:$PATH"' >> .env
         export PATH="/home/runner/work/yawast/yawast:$PATH"
-        cat ~/.bashrc
         echo $PATH
         which chromedriver
 
