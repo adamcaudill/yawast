@@ -261,10 +261,10 @@
         },
         "validator-collection": {
             "hashes": [
-                "sha256:12a7415f623478c1ee087d206b36a0965155eacc4aa8a8594d4ab7b38f8211eb"
+                "sha256:a3df71eeca9e3ae614fc06ccb71193352c1c33f9bee616bedd4c468149d307b2"
             ],
             "index": "pypi",
-            "version": "==1.3.5"
+            "version": "==1.3.6"
         },
         "yawast": {
             "editable": true,
