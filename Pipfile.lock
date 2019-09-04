@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9424044ad8ec1e7b5cc887e033f4edc69f00e23badb13c196ff472ef09ce207b"
+            "sha256": "6e7bceb89ddbdffbba4189106210171b5fb7217e1d61865917cbaff112f863b8"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -136,11 +136,11 @@
         },
         "jsonschema": {
             "hashes": [
-                "sha256:000e68abd33c972a5248544925a0cae7d1125f9bf6c58280d37546b946769a08",
-                "sha256:6ff5f3180870836cae40f06fa10419f557208175f13ad7bc26caa77beb1f6e02"
+                "sha256:5f9c0a719ca2ce14c5de2fd350a64fd2d13e8539db29836a86adc990bb1a068f",
+                "sha256:8d4a2b7b6c2237e0199c8ea1a6d3e05bf118e289ae2b9d7ba444182a2959560d"
             ],
             "index": "pypi",
-            "version": "==2.6.0"
+            "version": "==3.0.2"
         },
         "nassl": {
             "hashes": [
@@ -199,6 +199,12 @@
                 "sha256:d9338df12903bbf5d65a0e4e87c2161968b10d2e489652bb47001d82a9b028b4"
             ],
             "version": "==2.4.2"
+        },
+        "pyrsistent": {
+            "hashes": [
+                "sha256:34b47fa169d6006b32e99d4b3c4031f155e6e68ebcc107d6454852e8e0ee6533"
+            ],
+            "version": "==0.15.4"
         },
         "requests": {
             "hashes": [
