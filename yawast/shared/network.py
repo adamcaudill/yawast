@@ -73,7 +73,7 @@ def init(proxy: str, cookie: str, header: str) -> None:
             current_cookie = cookie.split(";")
         else:
             current_cookie = cookie
-         
+
         for i in current_cookie:
             if "=" in cookie:
                 name = i.split("=", 1)[0]
@@ -84,7 +84,7 @@ def init(proxy: str, cookie: str, header: str) -> None:
             else:
                 output.error(
                     f"Invalid cookie specified ({cookie}) - cookie must be in NAME=VALUE format. Ignored."
-                    )
+                )
 
     if header is not None and len(header) > 0:
         if "=" in header:
