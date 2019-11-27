@@ -78,6 +78,9 @@ jobs:
         brew tap homebrew/cask
         brew cask install chromedriver
         brew cask install google-chrome
+        which chromedriver
+        sudo spctl --master-disable
+        chromedriver -v
       shell: bash {0}
 
     - name: Test with unittest
