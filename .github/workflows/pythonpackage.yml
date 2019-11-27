@@ -78,6 +78,7 @@ jobs:
         brew tap homebrew/cask
         brew cask install chromedriver
         brew cask install google-chrome
+        which chromedriver
         chromedriver -v
       shell: bash {0}
 
