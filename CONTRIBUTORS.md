@@ -11,3 +11,4 @@ Copyright (c) 2013 - 2019 Adam Caudill and Contributors.
 * Adam Caudill <adam@adamcaudill.com>
 * Brandon Wilson <brandonlw@gmail.com>
 * Nick Santamaria <nick@nicksantamaria.net>
+* Ryan Borden <ryan.borden@bsigroup.com>
