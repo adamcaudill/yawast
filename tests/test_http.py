@@ -771,6 +771,23 @@ class TestHttpBasic(TestCase):
 
         network.reset()
 
+    def test_net_init_two_valid_cookie(self):
+        try:
+            output.setup(False, True, True)
+            with utils.capture_sys_output() as (stdout, stderr):
+                network.init("", "SESSION=123;C=456", "")
+
+                _ = network.http_get("http://example.com")
+        except Exception as error:
+            self.assertIsNone(error)
+
+        self.assertIsNotNone(network._requester)
+        self.assertNotIn("Exception", stderr.getvalue())
+        self.assertNotIn("Error", stdout.getvalue())
+        self.assertNotIn("cookie must be in NAME=VALUE format", stdout.getvalue())
+
+        network.reset()
+
     def test_net_init_invalid_cookie(self):
         try:
             output.setup(False, True, True)
