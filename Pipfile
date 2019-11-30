@@ -29,6 +29,8 @@ beautifulsoup4 = "*"
 psutil = "*"
 selenium = "*"
 setuptools = "*"
+ordered-set = "*"
+requirementslib = "*"
 
 [requires]
 python_version = "3.7"

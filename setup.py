@@ -81,6 +81,7 @@ build_exe_options = {
         "bs4",
         "selenium",
         "configparser",
+        "ordered_set",
     ],
     "excludes": ["tkinter", "distutils"],
     "include_files": win_include_files,
