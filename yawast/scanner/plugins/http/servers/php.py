@@ -88,18 +88,29 @@ def find_phpinfo(links: List[str]) -> List[Result]:
     return results
 
 
-def check_cve_2019_11043(session: Session) -> List[Result]:
-    MIN_QSL = 1500
-    MAX_QSL = 1950
-    QSL_STEP = 5
+def check_cve_2019_11043(session: Session, links: List[str]) -> List[Result]:
+    min_qsl = 1500
+    max_qsl = 1950
+    qsl_step = 5
     results = []
+    targets = []
 
-    base_url = urljoin(session.url, session.args.php_page)
+    if session.args.php_page is not None and len(session.args.php_page) > 0:
+        php_page = str(session.args.php_page)
+
+        if php_page.startswith("http://") or php_page.startswith("https://"):
+            targets.append(urljoin(session.url, php_page))
+        elif php_page.startswith(session.url):
+            targets.append(php_page)
+
+    for link in links:
+        if link.endswith(".php"):
+            targets.append(link)
+        elif link.endswith("/"):
+            targets.append(f"{link}index.php")
 
     def _get_resp(url: str, q_count: int) -> Response:
-        path_info = (
-            "/PHP\nis_the_shittiest_lang.php"
-        )  # hey, I didn't come up with it...
+        path_info = "/PHP\nindex.php"
         u = urlparse(url)
         orig_path = quote(u.path)
         new_path = quote(u.path + path_info)
@@ -109,19 +120,23 @@ def check_cve_2019_11043(session: Session) -> List[Result]:
 
         return network.http_get(req_url, False)
 
-    res = _get_resp(base_url, 1500)
-    base_status_code = res.status_code
+    for target in targets:
+        # start by making sure that we have a valid target
+        if network.http_head(target, False).status_code < 400:
+            # get our baseline status code
+            res = _get_resp(target, 1500)
+            base_status_code = res.status_code
 
-    for qsl in range(MIN_QSL + QSL_STEP, MAX_QSL, QSL_STEP):
-        res = _get_resp(base_url, qsl)
-        if res.status_code != base_status_code:
-            results.append(
-                Result.from_evidence(
-                    Evidence.from_response(res, {"qsl": qsl}),
-                    f"Detected susceptibility to PHP Remote Code Execution (CVE-2019-11043) (QSL {qsl})",
-                    Vulnerabilities.SERVER_PHP_CVE_2019_11043,
-                )
-            )
-            break
+            for qsl in range(min_qsl + qsl_step, max_qsl, qsl_step):
+                res = _get_resp(target, qsl)
+                if res.status_code != base_status_code:
+                    results.append(
+                        Result.from_evidence(
+                            Evidence.from_response(res, {"qsl": qsl}),
+                            f"Detected susceptibility to PHP Remote Code Execution (CVE-2019-11043) (QSL {qsl})",
+                            Vulnerabilities.SERVER_PHP_CVE_2019_11043,
+                        )
+                    )
+                    break
 
     return results

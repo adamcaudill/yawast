@@ -955,9 +955,12 @@ class TestHttpBasic(TestCase):
             output.setup(False, True, True)
             with utils.capture_sys_output() as (stdout, stderr):
                 with requests_mock.Mocker() as m:
-                    m.get(requests_mock.ANY, content=b"", status_code=200)
+                    m.get(requests_mock.ANY, status_code=200)
+                    m.head(requests_mock.ANY, status_code=200)
 
-                    results = php.check_cve_2019_11043(s)
+                    results = php.check_cve_2019_11043(
+                        s, ["https://www.example.org/test/"]
+                    )
         except Exception as error:
             self.assertIsNone(error)
 

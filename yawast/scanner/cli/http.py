@@ -148,7 +148,7 @@ def scan(session: Session):
 
     if session.args.php_page is not None and len(session.args.php_page) > 0:
         with Spinner():
-            res = php.check_cve_2019_11043(session)
+            res = php.check_cve_2019_11043(session, links)
         if res:
             reporter.display_results(res, "\t")
 
