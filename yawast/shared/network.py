@@ -70,16 +70,22 @@ def init(proxy: str, cookie: str, header: str) -> None:
             )
 
     if cookie is not None and len(cookie) > 0:
-        if "=" in cookie:
-            name = cookie.split("=", 1)[0]
-            val = cookie.split("=", 1)[1]
-            c = requests.cookies.create_cookie(name=name, value=val)
-
-            _requester.cookies.set_cookie(c)
+        if ";" in cookie:
+            current_cookie = cookie.split(";")
         else:
-            output.error(
-                f"Invalid cookie specified ({cookie}) - cookie must be in NAME=VALUE format. Ignored."
-            )
+            current_cookie = cookie
+         
+        for i in current_cookie:
+            if "=" in cookie:
+                name = i.split("=", 1)[0]
+                val = i.split("=", 1)[1]
+                c = requests.cookies.create_cookie(name=name, value=val)
+
+                _requester.cookies.set_cookie(c)
+            else:
+                output.error(
+                    f"Invalid cookie specified ({cookie}) - cookie must be in NAME=VALUE format. Ignored."
+                    )
 
     if header is not None and len(header) > 0:
         if "=" in header:
