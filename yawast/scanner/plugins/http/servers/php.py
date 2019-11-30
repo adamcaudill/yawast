@@ -116,10 +116,10 @@ def check_cve_2019_11043(session: Session) -> List[Result]:
         res = _get_resp(base_url, qsl)
         if res.status_code != base_status_code:
             results.append(
-                Result(
+                Result.from_evidence(
+                    Evidence.from_response(res, {"qsl": qsl}),
                     f"Detected susceptibility to PHP Remote Code Execution (CVE-2019-11043) (QSL {qsl})",
                     Vulnerabilities.SERVER_PHP_CVE_2019_11043,
-                    base_url,
                 )
             )
             break
