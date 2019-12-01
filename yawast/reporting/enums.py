@@ -414,6 +414,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     SERVER_PHP_PHPINFO = VulnerabilityInfo.create(
         "Server_PHP_PHPInfo", Severity.LOW, ""
     )
+    SERVER_PHP_CVE_2019_11043 = VulnerabilityInfo.create(
+        "Server_PHP_CVE_2019_11043", Severity.CRITICAL, ""
+    )
     SERVER_IIS_OUTDATED = VulnerabilityInfo.create(
         "Server_IIS_Outdated", Severity.MEDIUM, ""
     )

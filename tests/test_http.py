@@ -9,6 +9,7 @@ import requests
 import requests_mock
 
 from tests import utils
+from yawast import command_line
 from yawast.scanner.cli import http
 from yawast.scanner.plugins.http import http_basic, response_scanner, file_search
 from yawast.scanner.plugins.http.applications import wordpress, jira
@@ -938,5 +939,34 @@ class TestHttpBasic(TestCase):
         self.assertNotIn("Exception", stderr.getvalue())
         self.assertNotIn("Error", stdout.getvalue())
         self.assertTrue(any(".DS_Store File Found" in r.message for r in results))
+
+        network.reset()
+
+    def test_cve_2019_11043_false(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
+        url = "https://www.example.org/"
+
+        p = command_line.build_parser()
+        ns = p.parse_args(args=["scan"])
+        s = Session(ns, url)
+
+        try:
+            output.setup(False, True, True)
+            with utils.capture_sys_output() as (stdout, stderr):
+                with requests_mock.Mocker() as m:
+                    m.get(requests_mock.ANY, status_code=200)
+                    m.head(requests_mock.ANY, status_code=200)
+
+                    results = php.check_cve_2019_11043(
+                        s, ["https://www.example.org/test/"]
+                    )
+        except Exception as error:
+            self.assertIsNone(error)
+
+        self.assertIsNotNone(results)
+        self.assertTrue(len(results) == 0)
+        self.assertNotIn("Exception", stderr.getvalue())
+        self.assertNotIn("Error", stdout.getvalue())
 
         network.reset()
