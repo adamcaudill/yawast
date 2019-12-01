@@ -79,6 +79,7 @@ The following checks are performed:
 * *(PHP)* Info Disclosure: PHP version
 * *(PHP)* Outdated version
 * *(PHP)* Common files calling `phpinfo()`
+* *(PHP)* RCE (CVE-2019-11043)
 * *(Jira)* Version Installed
 * *(Rails)* File Content Disclosure: CVE-2019-5418
 * *(Rails)* Presence of X-Runtime header

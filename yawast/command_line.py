@@ -99,6 +99,11 @@ def build_parser():
         type=str,
         help="Password reset page URL (will prompt if not provided)",
     )
+    parser_scan.add_argument(
+        "--php_page",
+        type=str,
+        help="Relative path to PHP script (for additional tests)",
+    )
     parser_scan.set_defaults(func=command_scan)
 
     # create the parser for the "dns" command
