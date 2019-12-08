@@ -171,6 +171,33 @@ def get_header_issues(res: Response, raw: str, url: str) -> List[Result]:
 
         if "Server" in headers:
             results += get_server_banner_issues(headers["Server"], raw, url, headers)
+
+        # check to see if any headers are duplicated.
+        # we have to access a private member, as it's the only access to the raw headers
+        if res.raw._original_response is not None:
+            raw_headers = str(res.raw._original_response.headers).splitlines(False)
+            raw_headers_checked: List[str] = []
+
+            for raw_header in raw_headers:
+                header_name = raw_header.split(":")[0]
+
+                if header_name not in raw_headers_checked:
+                    raw_headers_checked.append(header_name)
+
+                    for dup in raw_headers:
+                        dup_name = dup.split(":")[0]
+
+                        if dup_name == header_name and dup != raw_header:
+                            # we have a second header, with a different value
+                            results.append(
+                                Result.from_evidence(
+                                    Evidence.from_response(res),
+                                    f"Header {header_name} set multiple times with different values at {url}",
+                                    Vln.HTTP_HEADER_DUPLICATE,
+                                )
+                            )
+
+                            break
     except Exception:
         output.debug_exception()
 

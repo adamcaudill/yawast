@@ -196,6 +196,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     HTTP_HEADER_PRAGMA_NO_CACHE_MISSING = VulnerabilityInfo.create(
         "Http_Header_Pragma_No_Cache_Missing", Severity.LOW, ""
     )
+    HTTP_HEADER_DUPLICATE = VulnerabilityInfo.create(
+        "Http_Header_Duplicate", Severity.LOW, ""
+    )
 
     HTTP_ERROR_MESSAGE = VulnerabilityInfo.create(
         "Http_Error_Message", Severity.MEDIUM, "", True
