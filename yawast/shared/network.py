@@ -264,7 +264,12 @@ def http_build_raw_response(res: Response) -> str:
 
     res_string = res_line + "\r\n"
 
-    res_string += "\r\n".join(f"{k}: {v}" for k, v in res.headers.items())
+    if res.raw._original_response is not None:
+        res_string += "\r\n".join(
+            str(res.raw._original_response.headers).splitlines(False)
+        )
+    else:
+        res_string += "\r\n".join(f"{k}: {v}" for k, v in res.headers.items())
 
     try:
         txt = res.text

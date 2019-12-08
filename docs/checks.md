@@ -25,6 +25,7 @@ The following checks are performed:
 * *(Generic)* Feature-Policy header not present
 * *(Generic)* X-XSS-Protection disabled header present
 * *(Generic)* SSL: HSTS not enabled
+* *(Generic)* Duplicate HTTP Headers
 * *(Generic)* Source Control: Common source control directories present
 * *(Generic)* Presence of crossdomain.xml or clientaccesspolicy.xml
 * *(Generic)* Presence of sitemap.xml

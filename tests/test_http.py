@@ -61,6 +61,32 @@ class TestHttpBasic(TestCase):
 
         self.assertEqual(0, len(res))
 
+    def test_get_header_issues_dup_header(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
+
+        # we are using www.google.com as they return multiple Set-Cookie headers
+        url = "https://www.google.com"
+
+        output.setup(False, True, True)
+        with utils.capture_sys_output() as (stdout, stderr):
+            resp = requests.get(url)
+            results = http_basic.get_header_issues(
+                resp, network.http_build_raw_response(resp), url
+            )
+
+        self.assertIsNotNone(results)
+        self.assertTrue(len(results) > 0)
+        self.assertNotIn("Exception", stderr.getvalue())
+        self.assertNotIn("Error", stdout.getvalue())
+        self.assertTrue(
+            any(
+                "Header Set-Cookie set multiple times with different values"
+                in r.message
+                for r in results
+            )
+        )
+
     def test_get_header_issues_powered_by(self):
         url = "http://example.com"
 
