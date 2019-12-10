@@ -1,4 +1,4 @@
-## 0.10.0 - In Development
+## 0.10.0 - 2019-12-10
 
 * [#194](https://github.com/adamcaudill/yawast/issues/194) - Check for Duplicate HTTP Headers
 * [#261](https://github.com/adamcaudill/yawast/issues/261) - Bump sslyze from 2.1.3 to 2.1.4
