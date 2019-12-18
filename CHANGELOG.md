@@ -1,3 +1,7 @@
+## 0.11.0 - In Development
+
+* [#308](https://github.com/adamcaudill/yawast/issues/308) - Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled
+
 ## 0.10.0 - 2019-12-10
 
 * [#194](https://github.com/adamcaudill/yawast/issues/194) - Check for Duplicate HTTP Headers

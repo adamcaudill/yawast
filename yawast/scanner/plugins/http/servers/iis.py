@@ -4,15 +4,17 @@
 
 import secrets
 from typing import List, cast, Dict
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, urlunparse
 
+from bs4 import BeautifulSoup
 from packaging import version
+from requests import Response
 
 from yawast.reporting.enums import Vulnerabilities
 from yawast.scanner.plugins.evidence import Evidence
 from yawast.scanner.plugins.http import version_checker, response_scanner
 from yawast.scanner.plugins.result import Result
-from yawast.shared import network, output
+from yawast.shared import network, output, utils
 
 
 def check_all(url: str) -> List[Result]:
@@ -172,5 +174,50 @@ def check_asp_net_debug(url: str) -> List[Result]:
             output.debug("Server responds to invalid HTTP verbs with status 200")
 
     results += response_scanner.check_response(url, res)
+
+    return results
+
+
+def check_telerik_rau_enabled(soup: BeautifulSoup, url: str) -> List[Result]:
+    results: List[Result] = []
+
+    parsed = urlparse(url)
+    domain = utils.get_domain(parsed.netloc)
+
+    try:
+        # get all the scripts
+        files = [i.get("src") for i in soup.find_all("script") if i.get("src")]
+
+        for file in files:
+            if "Telerik.Web.UI.WebResource.axd" in file:
+                # ok, they are using Telerik UI for ASP.NET AJAX
+                # fix-up the URL
+                if str(file).startswith("//"):
+                    file = f"https:{file}"
+                if str(file).startswith("/") or (not str(file).startswith("http")):
+                    if parsed.scheme == "https":
+                        file = urljoin(f"https://{domain}", file)
+                    else:
+                        file = urljoin(f"http://{domain}", file)
+
+                target = urlparse(file)
+                target = target._replace(query="type=rau")
+
+                if domain in target:
+                    res = network.http_get(urlunparse(target), False)
+                    # NOTE: Typo in "succesfully" is intentional - do not fix
+                    if "RadAsyncUpload handler is registered succesfully" in res.text:
+                        results.append(
+                            Result.from_evidence(
+                                Evidence.from_response(res, {"original_url": url}),
+                                f"Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled "
+                                f"(Check for CVE-2019-18935) at {target}",
+                                Vulnerabilities.APP_TELERIK_UI_RAD_ASYNC_UPLOAD_ENABLED,
+                            )
+                        )
+
+                        break
+    except Exception:
+        output.debug_exception()
 
     return results
