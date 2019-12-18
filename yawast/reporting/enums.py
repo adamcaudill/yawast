@@ -61,6 +61,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     APP_JIRA_USER_REG_ENABLED = VulnerabilityInfo.create(
         "App_Jira_User_Reg_Enabled", Severity.LOW, ""
     )
+    APP_TELERIK_UI_RAD_ASYNC_UPLOAD_ENABLED = VulnerabilityInfo(
+        "App_Telerik_UI_Rad_Async_Upload_Enabled", Severity.LOW, ""
+    )
 
     COOKIE_MISSING_SECURE_FLAG = VulnerabilityInfo.create(
         "Cookie_Missing_Secure_Flag", Severity.MEDIUM, "", True

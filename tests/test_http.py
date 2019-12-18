@@ -7,6 +7,7 @@ from unittest import TestCase
 
 import requests
 import requests_mock
+from bs4 import BeautifulSoup
 
 from tests import utils
 from yawast import command_line
@@ -14,7 +15,7 @@ from yawast.scanner.cli import http
 from yawast.scanner.plugins.http import http_basic, response_scanner, file_search
 from yawast.scanner.plugins.http.applications import wordpress, jira
 from yawast.scanner.plugins.http.response_scanner import _check_cache_headers
-from yawast.scanner.plugins.http.servers import rails, python, nginx, php
+from yawast.scanner.plugins.http.servers import rails, python, nginx, php, iis
 from yawast.scanner.session import Session
 from yawast.shared import network, output
 
@@ -994,5 +995,45 @@ class TestHttpBasic(TestCase):
         self.assertTrue(len(results) == 0)
         self.assertNotIn("Exception", stderr.getvalue())
         self.assertNotIn("Error", stdout.getvalue())
+
+        network.reset()
+
+    def test_telerik_rau_enabled(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
+        url = "https://www.example.org/"
+
+        try:
+            output.setup(False, True, True)
+            with utils.capture_sys_output() as (stdout, stderr):
+                with requests_mock.Mocker() as m:
+                    m.get(
+                        url=url,
+                        text='<html><body><script src="/Telerik.Web.UI.WebResource.axd'
+                        '?_ABC=1" type="text/javascript"></script></body></html>',
+                    )
+                    m.get(
+                        url=f"{url}Telerik.Web.UI.WebResource.axd?type=rau",
+                        text='{ "message" : "RadAsyncUpload handler is registered succesfully, '
+                        'however, it may not be accessed directly." }',
+                    )
+
+                    res = network.http_get(url)
+                    body = res.text
+                    soup = BeautifulSoup(body, "html.parser")
+
+                    results = iis.check_telerik_rau_enabled(soup, url)
+        except Exception as error:
+            self.assertIsNone(error)
+
+        self.assertIsNotNone(results)
+        self.assertNotIn("Exception", stderr.getvalue())
+        self.assertNotIn("Error", stdout.getvalue())
+        self.assertTrue(
+            any(
+                "Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled" in r.message
+                for r in results
+            )
+        )
 
         network.reset()

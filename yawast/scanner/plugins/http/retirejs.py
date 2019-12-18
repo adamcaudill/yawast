@@ -94,7 +94,10 @@ def _get_retirejs_results(
             if str(file).startswith("//"):
                 file = f"https:{file}"
             if str(file).startswith("/") or (not str(file).startswith("http")):
-                file = urljoin(url, file)
+                if urlparse(url).scheme == "https":
+                    file = urljoin(f"https://{domain}", file)
+                else:
+                    file = urljoin(f"http://{domain}", file)
 
             if file not in _checked:
                 findings = retirejs.scan_endpoint(file, _data)

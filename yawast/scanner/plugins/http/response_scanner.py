@@ -11,7 +11,7 @@ from requests.models import Response
 from yawast.reporting.enums import Vulnerabilities
 from yawast.scanner.plugins.evidence import Evidence
 from yawast.scanner.plugins.http import http_basic, retirejs, error_checker, http_utils
-from yawast.scanner.plugins.http.servers import rails, apache_tomcat
+from yawast.scanner.plugins.http.servers import rails, apache_tomcat, iis
 from yawast.scanner.plugins.result import Result
 from yawast.shared import network, output
 
@@ -37,6 +37,7 @@ def check_response(
         results += retirejs.get_results(soup, url, res)
         results += apache_tomcat.get_version(url, res)
         results += error_checker.check_response(url, res, body)
+        results += iis.check_telerik_rau_enabled(soup, url)
 
         results += _check_cache_headers(url, res)
 
