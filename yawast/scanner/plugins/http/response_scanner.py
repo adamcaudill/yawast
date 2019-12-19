@@ -44,10 +44,7 @@ def check_response(
     results += http_basic.get_header_issues(res, raw_full, url)
     results += http_basic.get_cookie_issues(res, url)
 
-    # this function will trigger a recursive call, as it calls this to check the response.
-    # to deal with this, we'll check the caller, to make sure it's not what we're about to call.
-    if "check_cve_2019_5418" not in inspect.stack()[1].function:
-        results += rails.check_cve_2019_5418(url)
+    results += rails.check_cve_2019_5418(url)
 
     results += _check_charset(url, res)
 

@@ -36,20 +36,20 @@ def check_cve_2019_5418(url: str) -> List[Result]:
         body = res.text
         req = network.http_build_raw_request(res.request)
 
-        results += response_scanner.check_response(url, res)
+        # check to see if "root" is in the string, then do the proper check
+        if "root:" in body:
+            pattern = r"root:[a-zA-Z0-9]+:0:0:.+$"
+            mtch = re.search(pattern, body)
 
-        pattern = r"root:[a-zA-Z0-9]+:0:0:.+$"
-        mtch = re.search(pattern, body)
-
-        if mtch:
-            results.append(
-                Result(
-                    f"Rails CVE-2019-5418: File Content Disclosure: {url} - {mtch.group(0)}",
-                    Vulnerabilities.SERVER_RAILS_CVE_2019_5418,
-                    url,
-                    [body, req],
+            if mtch:
+                results.append(
+                    Result(
+                        f"Rails CVE-2019-5418: File Content Disclosure: {url} - {mtch.group(0)}",
+                        Vulnerabilities.SERVER_RAILS_CVE_2019_5418,
+                        url,
+                        [body, req],
+                    )
                 )
-            )
     except Exception:
         output.debug_exception()
 
