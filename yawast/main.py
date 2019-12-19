@@ -166,6 +166,7 @@ def _shutdown():
 
     elapsed = datetime.now() - _start_time
     mem_res = "{0:cM}".format(Size(_monitor.peak_mem_res))
+    reporter.register_info("peak_memory", _monitor.peak_mem_res)
 
     output.empty()
 
