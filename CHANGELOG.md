@@ -1,6 +1,7 @@
 ## 0.11.0 - In Development
 
 * [#308](https://github.com/adamcaudill/yawast/issues/308) - Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled
+* [#312](https://github.com/adamcaudill/yawast/issues/312) - Make JSON Storage More Efficient
 
 ## 0.10.0 - 2019-12-10
 

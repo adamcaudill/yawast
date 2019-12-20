@@ -2,6 +2,7 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
+import hashlib
 import json
 import os
 import time
@@ -20,6 +21,7 @@ from yawast.shared.exec_timer import ExecutionTimer
 _issues: Dict[str, Dict[Vulnerabilities, List[Issue]]] = {}
 _info: Dict[str, Any] = {}
 _data: Dict[str, Any] = {}
+_evidence: Dict[str, Any] = {}
 _domain: str = ""
 _output_file: str = ""
 
@@ -63,6 +65,7 @@ def save_output(spinner=None):
         "data": _convert_keys(_data),
         "issues": _convert_keys(_issues),
         "vulnerabilities": vulns,
+        "evidence": _convert_keys(_evidence),
     }
     json_data = json.dumps(data, sort_keys=True, indent=4)
 
@@ -111,6 +114,9 @@ def setup(domain: str) -> None:
 
     if _domain not in _data:
         _data[_domain] = {}
+
+    if _domain not in _evidence:
+        _evidence[_domain] = {}
 
 
 def is_registered(vuln: Vulnerabilities) -> bool:
@@ -163,11 +169,35 @@ def register_message(value: str, kind: str):
 
 
 def register(issue: Issue) -> None:
-    global _issues, _domain
+    global _issues, _domain, _evidence
 
     # make sure the Dict for _domain exists - this shouldn't normally be an issue, but is for unit tests
     if _domain not in _issues:
         _issues[_domain] = {}
+
+    # add the evidence to the evidence list, and swap the value in the object for its hash.
+    # the point of this is to minimize cases where we are holding the same (large) string
+    # multiple times in memory. should reduce memory by up to 20%
+    if _domain not in _evidence:
+        _evidence[_domain] = {}
+
+    if "request" in issue.evidence and issue.evidence["request"] is not None:
+        req = str(issue.evidence["request"]).encode("utf-8")
+        req_id = hashlib.blake2b(req, digest_size=16).hexdigest()
+
+        if req_id not in _evidence[_domain]:
+            _evidence[_domain][req_id] = issue.evidence["request"]
+
+        issue.evidence["request"] = req_id
+
+    if "response" in issue.evidence and issue.evidence["response"] is not None:
+        res = str(issue.evidence["response"]).encode("utf-8")
+        res_id = hashlib.blake2b(res, digest_size=16).hexdigest()
+
+        if res_id not in _evidence[_domain]:
+            _evidence[_domain][res_id] = issue.evidence["response"]
+
+        issue.evidence["response"] = res_id
 
     # if we haven't handled this issue yet, create a List for it
     if not is_registered(issue.vulnerability):
