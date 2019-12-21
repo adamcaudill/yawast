@@ -274,12 +274,16 @@ def http_build_raw_response(res: Response) -> str:
         res_string += "\r\n".join(f"{k}: {v}" for k, v in res.headers.items())
 
     try:
-        txt = res.text
+        if response_body_is_text(res):
+            txt = res.text
 
-        if txt != "":
-            res_string += "\r\n\r\n"
+            if txt != "":
+                res_string += "\r\n\r\n"
 
-            res_string += txt
+                res_string += txt
+        elif len(res.content) > 0:
+            # the body is binary - no real value in keeping it
+            res_string += "\r\n\r\n<BINARY DATA EXCLUDED>"
     except Exception:
         output.debug_exception()
 
