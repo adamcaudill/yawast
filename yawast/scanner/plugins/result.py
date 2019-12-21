@@ -41,10 +41,6 @@ class Result:
 
         self.id = uuid.uuid4().hex
 
-        output.debug(
-            f"Result Created: {self.id} - {self.vulnerability.name} - {self.url}"
-        )
-
     def __repr__(self):
         return f"Result: {self.id} - {self.vulnerability.name} - {self.url} - {self.message}"
 
