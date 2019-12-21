@@ -79,6 +79,7 @@ def spider(url) -> Tuple[List[str], List[Result]]:
     links = _links[:]
     _links = []
     _insecure = []
+    _tasks = []
 
     return links, results
 
@@ -139,7 +140,7 @@ def _get_links(base_url: str, urls: List[str], queue, pool):
                                 _links.append(href)
 
                             # filter out some of the obvious binary files
-                            if file_ext is None or file_ext not in [
+                            if file_ext is None or str(file_ext).lower() not in [
                                 "gzip",
                                 "jpg",
                                 "jpeg",
