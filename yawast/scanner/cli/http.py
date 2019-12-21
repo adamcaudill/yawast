@@ -19,6 +19,7 @@ from yawast.scanner.plugins.http import (
     special_files,
     file_search,
     error_checker,
+    response_scanner,
 )
 from yawast.scanner.plugins.http.applications.generic import password_reset
 from yawast.scanner.plugins.http.applications import wordpress, jira
@@ -190,6 +191,12 @@ def _file_search(session: Session, orig_links: List[str]) -> List[str]:
     # these are here for data typing
     results: Union[List[Result], None]
     links: Union[List[str], None]
+
+    # check the 404 responses for any issues
+    results = response_scanner.check_response(file_res.url, file_res)
+    results += response_scanner.check_response(path_res.url, path_res)
+    if results:
+        reporter.display_results(results, "\t")
 
     if not file_good:
         reporter.display(
