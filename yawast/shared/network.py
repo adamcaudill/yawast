@@ -45,6 +45,7 @@ def init(proxy: str, cookie: str, header: str) -> None:
         HTTPAdapter(
             max_retries=urllib3.Retry(total=3, read=5, connect=5, backoff_factor=0.3),
             pool_maxsize=50,
+            pool_block=True,
         ),
     )
     _requester.mount(
@@ -52,6 +53,7 @@ def init(proxy: str, cookie: str, header: str) -> None:
         HTTPAdapter(
             max_retries=urllib3.Retry(total=3, read=5, connect=5, backoff_factor=0.3),
             pool_maxsize=50,
+            pool_block=True,
         ),
     )
 
