@@ -2,6 +2,7 @@
 
 * [#308](https://github.com/adamcaudill/yawast/issues/308) - Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled
 * [#312](https://github.com/adamcaudill/yawast/issues/312) - Make JSON Storage More Efficient
+* [#313](https://github.com/adamcaudill/yawast/issues/313) - Improve File Search for Misconfigured Servers
 
 ## 0.10.0 - 2019-12-10
 

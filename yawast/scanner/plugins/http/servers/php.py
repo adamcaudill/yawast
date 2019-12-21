@@ -3,7 +3,7 @@
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import List, cast
+from typing import List, cast, Tuple
 from urllib.parse import urljoin, urlparse, quote
 
 from packaging import version
@@ -54,13 +54,15 @@ def find_phpinfo(links: List[str]) -> List[Result]:
     results = []
     queue = []
 
-    def _get_resp(url: str) -> Response:
-        return network.http_get(url, False)
+    def _get_resp(url: str) -> Tuple[bool, Response]:
+        return network.http_file_exists(url, False)
 
-    def _process(url: str, res: Response):
+    def _process(url: str, result: Tuple[bool, Response]):
         nonlocal results
 
-        if res.status_code == 200 and '<h1 class="p">PHP Version' in res.text:
+        found, res = result
+
+        if found and '<h1 class="p">PHP Version' in res.text:
             results.append(
                 Result.from_evidence(
                     Evidence.from_response(res),

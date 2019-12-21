@@ -58,7 +58,7 @@ def _check_url(url: str, targets: List[str]) -> Tuple[List[str], List[Result]]:
     for target in targets:
         target_url = urljoin(url, target)
 
-        res = network.http_get(target_url, False)
+        found, res = network.http_file_exists(target_url, False)
 
         results += response_scanner.check_response(target_url, res)
 

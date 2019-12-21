@@ -619,6 +619,7 @@ class TestHttpBasic(TestCase):
         with utils.capture_sys_output() as (stdout, stderr):
             with requests_mock.Mocker() as m:
                 m.get(requests_mock.ANY, text="body", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
 
                 try:
                     file, _, _, _ = network.check_404_response(url)
@@ -702,8 +703,10 @@ class TestHttpBasic(TestCase):
         output.setup(False, False, False)
         with utils.capture_sys_output() as (stdout, stderr):
             with requests_mock.Mocker() as m:
-                m.get(requests_mock.ANY, text="body", status_code=200)
-                m.head(requests_mock.ANY, status_code=200)
+                m.get(requests_mock.ANY, text="not found", status_code=404)
+                m.get(f"{url}test/readme.html", text="body", status_code=200)
+                m.head(requests_mock.ANY, status_code=404)
+                m.head(f"{url}test/readme.html", status_code=200)
 
                 try:
                     http.reset()
@@ -956,6 +959,7 @@ class TestHttpBasic(TestCase):
             with utils.capture_sys_output() as (stdout, stderr):
                 with requests_mock.Mocker() as m:
                     m.get(requests_mock.ANY, content=b"\0\0\0\1Bud1\0", status_code=200)
+                    m.head(requests_mock.ANY, status_code=200)
 
                     results = file_search.find_ds_store([url])
         except Exception as error:

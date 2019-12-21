@@ -33,23 +33,25 @@ def check_cve_2019_5418(url: str) -> List[Result]:
         res = network.http_get(
             url, False, {"Accept": "../../../../../../../../../e*c/p*sswd{{"}
         )
-        body = res.text
-        req = network.http_build_raw_request(res.request)
 
-        # check to see if "root" is in the string, then do the proper check
-        if "root:" in body:
-            pattern = r"root:[a-zA-Z0-9]+:0:0:.+$"
-            mtch = re.search(pattern, body)
+        if network.response_body_is_text(res):
+            body = res.text
+            req = network.http_build_raw_request(res.request)
 
-            if mtch:
-                results.append(
-                    Result(
-                        f"Rails CVE-2019-5418: File Content Disclosure: {url} - {mtch.group(0)}",
-                        Vulnerabilities.SERVER_RAILS_CVE_2019_5418,
-                        url,
-                        [body, req],
+            # check to see if "root" is in the string, then do the proper check
+            if "root:" in body:
+                pattern = r"root:[a-zA-Z0-9]+:0:0:.+$"
+                mtch = re.search(pattern, body)
+
+                if mtch:
+                    results.append(
+                        Result(
+                            f"Rails CVE-2019-5418: File Content Disclosure: {url} - {mtch.group(0)}",
+                            Vulnerabilities.SERVER_RAILS_CVE_2019_5418,
+                            url,
+                            [body, req],
+                        )
                     )
-                )
     except Exception:
         output.debug_exception()
 

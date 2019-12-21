@@ -219,49 +219,48 @@ def _file_search(session: Session, orig_links: List[str]) -> List[str]:
 
     if not (file_good or path_good):
         output.norm(
-            "Site does not respond properly to non-existent file/path requests; skipping some checks."
+            "Site does not respond properly to non-existent file/path requests; search may take longer."
         )
 
-    if file_good:
-        links, results = special_files.check_special_files(session.url)
-        if results:
+    links, results = special_files.check_special_files(session.url)
+    if results:
+        reporter.display_results(results, "\t")
+
+    new_files += links
+
+    if session.args.files:
+        output.empty()
+        output.norm("Searching for common files (this will take a few minutes)...")
+
+        with Spinner():
+            try:
+                links, results = file_search.find_files(session.url)
+            except Exception as error:
+                output.debug_exception()
+                output.error(f"Error running scan: {str(error)}")
+                results = None
+                links = None
+
+        if results is not None and results:
             reporter.display_results(results, "\t")
 
-        new_files += links
+        if links is not None and links:
+            new_files += links
 
-        if session.args.files:
+            for l in links:
+                if l not in orig_links:
+                    output.norm(f"\tNew file found: {l}")
+
             output.empty()
-            output.norm("Searching for common files (this will take a few minutes)...")
 
-            with Spinner():
-                try:
-                    links, results = file_search.find_files(session.url)
-                except Exception as error:
-                    output.debug_exception()
-                    output.error(f"Error running scan: {str(error)}")
-                    results = None
-                    links = None
-
-            if results is not None and results:
-                reporter.display_results(results, "\t")
-
-            if links is not None and links:
-                new_files += links
-
-                for l in links:
-                    if l not in orig_links:
-                        output.norm(f"\tNew file found: {l}")
-
-                output.empty()
-
-        # check for common backup files
-        all_links = orig_links + new_files
-        with Spinner():
-            backups, res = file_search.find_backups(all_links)
-        if res:
-            reporter.display_results(res, "\t")
-        if backups:
-            new_files += backups
+    # check for common backup files
+    all_links = orig_links + new_files
+    with Spinner():
+        backups, res = file_search.find_backups(all_links)
+    if res:
+        reporter.display_results(res, "\t")
+    if backups:
+        new_files += backups
 
     if path_good:
         links, results = special_files.check_special_paths(session.url)
@@ -303,11 +302,10 @@ def _file_search(session: Session, orig_links: List[str]) -> List[str]:
                 output.empty()
 
     # check for .DS_Store files
-    if file_good:
-        res = file_search.find_ds_store(new_files)
+    res = file_search.find_ds_store(new_files)
 
-        if res:
-            reporter.display_results(res, "\t")
+    if res:
+        reporter.display_results(res, "\t")
 
     return new_files
 
@@ -338,7 +336,8 @@ def _check_password_reset(session: Session, element_name: Optional[str] = None):
                 "Unable to find a known element to enter the user name. Please identify the proper element."
             )
             print(
-                "If this element seems to be common, please request that it be added: https://github.com/adamcaudill/yawast/issues"
+                "If this element seems to be common, please request that it be "
+                "added: https://github.com/adamcaudill/yawast/issues"
             )
             name = utils.prompt("What is the user/email entry element name? ")
 

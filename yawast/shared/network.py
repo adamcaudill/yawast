@@ -3,8 +3,10 @@
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
 import secrets
+from difflib import SequenceMatcher
 from http import cookiejar
 from typing import Dict, Union, Tuple, Optional
+from typing import cast
 from urllib.parse import urlparse, urljoin
 from urllib.parse import urlunparse
 
@@ -18,6 +20,7 @@ from validator_collection import checkers
 from yawast._version import get_version
 from yawast.reporting import reporter
 from yawast.shared import output, utils
+from yawast.shared.exec_timer import ExecutionTimer
 
 YAWAST_UA = (
     f"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -34,6 +37,7 @@ class _BlockCookiesSet(cookiejar.DefaultCookiePolicy):
 
 
 _requester = requests.Session()
+_file_not_found_handling: Dict[str, Dict[str, Union[bool, Response]]] = {}
 
 
 def init(proxy: str, cookie: str, header: str) -> None:
@@ -261,6 +265,88 @@ def http_json(
     return res.json(), res.status_code
 
 
+def http_file_exists(
+    url: str, allow_redirects=True, timeout: Optional[int] = 30
+) -> Tuple[bool, Response]:
+    # first, check our 404 handling
+    domain = utils.get_domain(url)
+    _get_404_handling(domain, url)
+
+    if _file_not_found_handling[domain]["file"]:
+        if _file_not_found_handling[domain]["head"]:
+            # we have good HEAD handling - we will start with head, as it's more efficient for us
+            head = http_head(url, allow_redirects=allow_redirects, timeout=timeout)
+
+            if head.status_code == 200:
+                # file exists, grab it
+                get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
+
+                return True, get
+            else:
+                return False, head
+        else:
+            # head isn't handled properly, default to GET
+            get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
+
+            return get.status_code == 200, get
+    else:
+        # the server doesn't handle 404s properly - there are a few different flavors of this issue, each
+        # different version requires a different approach
+        file_res = cast(Response, _file_not_found_handling[domain]["file_res"])
+        if file_res.status_code == 200:
+            # in this case, everything gets a 200, even if it doesn't exist
+            # to handle this, we need to look at the response, and see if we can work out if it's
+            # a file not found error, or something else.
+            get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
+
+            if response_body_is_text(file_res):
+                if response_body_is_text(get):
+                    # in case the responses are the same, check that first, then move on to comparing
+                    # this should be caught by the code below, but this is faster
+                    if file_res.content == get.content:
+                        return False, get
+
+                    # both are text, so we need to compare to see how similar they are
+                    with ExecutionTimer() as tm:
+                        ratio = SequenceMatcher(None, file_res.text, get.text).ratio()
+
+                    output.debug(
+                        f"Fuzzy Matching used. Text from known 404 and '{get.url}' compared in {tm.to_ms()}ms"
+                    )
+
+                    # check to see if we have an alignment of less than 90% between the known 404, and this response
+                    # if it's less than 90%, we will assume that the response is different, and we have a hit
+                    # this is somewhat error prone, as it depends on details of how the application works, though
+                    # most errors should be very similar, so the false positive rate should be low.
+                    if ratio < 0.9:
+                        output.debug(
+                            f"Fuzzy Matching used. Text from known 404 and '{get.url}' have a "
+                            f"similarity of {ratio} - assuming valid file."
+                        )
+
+                        return True, get
+                    else:
+                        return False, get
+                else:
+                    # if file_res is text, and this isn't, safe to call this a valid hit
+                    return True, get
+            else:
+                # this is a case that makes no sense. who knows what's going on here.
+                return file_res.content == get.content, get
+        elif file_res.status_code in range(300, 399):
+            # they are sending a redirect on file not found
+            # we can't honor the allow_redirects flag, as we can't tell if it's a legit redirect, or an error
+            # we should though get a 200 for valid hits
+            get = http_get(url, allow_redirects=False, timeout=timeout)
+
+            return get.status_code == 200, get
+        elif file_res.status_code >= 400:
+            # they are sending an error code that isn't 404 - in this case, we should still get a 200 on a valid hit
+            get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
+
+            return get.status_code == 200, get
+
+
 def http_build_raw_response(res: Response) -> str:
     if res.raw.version == 11:
         res_line = f"HTTP/1.1 {res.raw.status} {res.raw.reason}"
@@ -309,14 +395,40 @@ def http_build_raw_request(
 
 
 def check_404_response(url: str) -> Tuple[bool, Response, bool, Response]:
-    rnd = secrets.token_hex(12)
-    file_url = urljoin(url, f"{rnd}.html")
-    path_url = urljoin(url, f"{rnd}/")
+    domain = utils.get_domain(url)
+    _get_404_handling(domain, url)
 
-    file_res = http_get(file_url, False)
-    path_res = http_get(path_url, False)
+    return (
+        _file_not_found_handling[domain]["file"],
+        _file_not_found_handling[domain]["file_res"],
+        _file_not_found_handling[domain]["path"],
+        _file_not_found_handling[domain]["path_res"],
+    )
 
-    return file_res.status_code == 404, file_res, path_res.status_code == 404, path_res
+
+def _get_404_handling(domain: str, url: str):
+    if domain not in _file_not_found_handling:
+        _file_not_found_handling[domain] = {}
+
+        target = utils.extract_url(url)
+
+        rnd = secrets.token_hex(12)
+        file_url = urljoin(target, f"{rnd}.html")
+        path_url = urljoin(target, f"{rnd}/")
+
+        file_res = http_get(file_url, False)
+        path_res = http_get(path_url, False)
+
+        _file_not_found_handling[domain]["file"] = file_res.status_code == 404
+        _file_not_found_handling[domain]["file_res"] = file_res
+        _file_not_found_handling[domain]["path"] = path_res.status_code == 404
+        _file_not_found_handling[domain]["path_res"] = path_res
+
+        # check to see if HEAD returns something reasonable
+        head_res = http_head(file_url, False)
+
+        _file_not_found_handling[domain]["head"] = head_res.status_code == 404
+        _file_not_found_handling[domain]["head_res"] = head_res
 
 
 def check_ssl_redirect(url):

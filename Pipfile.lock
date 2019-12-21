@@ -376,10 +376,10 @@
         },
         "validator-collection": {
             "hashes": [
-                "sha256:80b72ef4950298b170399263bfd56eb4f0a9e3b269501f3d22ab0ab952ba4032"
+                "sha256:c0f99730a27880add58eb4c42c215b9a21febf1725ebe28d8167ae451d9847d5"
             ],
             "index": "pypi",
-            "version": "==1.3.8"
+            "version": "==1.4.0"
         },
         "vistir": {
             "hashes": [
@@ -512,7 +512,7 @@
         },
         "cx-freeze": {
             "git": "https://github.com/anthony-tuininga/cx_Freeze.git",
-            "ref": "214616b6d9e19495d24d481a7d89e1e71b0c3837"
+            "ref": "026c9af3b55fe80e08eac0d088438faa39e3ee77"
         },
         "distlib": {
             "hashes": [
