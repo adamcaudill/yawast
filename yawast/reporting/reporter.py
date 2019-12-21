@@ -2,6 +2,7 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
+import gc
 import hashlib
 import json
 import os
@@ -12,6 +13,7 @@ from typing import Dict, List, cast, Optional, Any, Union
 from zipfile import ZipFile
 
 from yawast.external.memory_size import Size
+from yawast.external.total_size import total_size
 from yawast.reporting.enums import Vulnerabilities, Severity
 from yawast.reporting.issue import Issue
 from yawast.scanner.plugins.result import Result
@@ -46,6 +48,14 @@ def init(output_file: Union[str, None] = None) -> None:
 def save_output(spinner=None):
     global _issues, _info, _output_file, _data
 
+    # add some extra debug data
+    register_info("memsize_issues", total_size(_issues))
+    register_info("memsize_info", total_size(_info))
+    register_info("memsize_data", total_size(_data))
+    register_info("memsize_evidence", total_size(_evidence))
+    register_info("gc_stats", gc.get_stats())
+    register_info("gc_objects", len(gc.get_objects()))
+
     if spinner:
         spinner.stop()
     print("Saving...")
@@ -64,10 +74,10 @@ def save_output(spinner=None):
         "_info": _convert_keys(_info),
         "data": _convert_keys(_data),
         "issues": _convert_keys(_issues),
-        "vulnerabilities": vulns,
         "evidence": _convert_keys(_evidence),
+        "vulnerabilities": vulns,
     }
-    json_data = json.dumps(data, sort_keys=True, indent=4)
+    json_data = json.dumps(data, indent=4)
 
     try:
         zf = ZipFile(f"{_output_file}.zip", "x", zipfile.ZIP_BZIP2)
