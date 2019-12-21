@@ -176,7 +176,8 @@ def http_get(
 
     output.debug(
         f"{res.request.method}: {url} - completed ({res.status_code}) in "
-        f"{int(res.elapsed.total_seconds() * 1000)}ms."
+        f"{int(res.elapsed.total_seconds() * 1000)}ms "
+        f"(Body: {len(res.content)})"
     )
 
     return res
@@ -209,7 +210,8 @@ def http_put(
 
     output.debug(
         f"{res.request.method}: {url} - completed ({res.status_code}) in "
-        f"{int(res.elapsed.total_seconds() * 1000)}ms."
+        f"{int(res.elapsed.total_seconds() * 1000)}ms "
+        f"(Body: {len(res.content)})"
     )
 
     return res
@@ -234,7 +236,8 @@ def http_custom(
 
     output.debug(
         f"{res.request.method}: {url} - completed ({res.status_code}) in "
-        f"{int(res.elapsed.total_seconds() * 1000)}ms."
+        f"{int(res.elapsed.total_seconds() * 1000)}ms "
+        f"(Body: {len(res.content)})"
     )
 
     return res
