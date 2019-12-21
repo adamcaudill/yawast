@@ -2,6 +2,7 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
+import gc
 import locale
 import platform
 import signal
@@ -302,16 +303,10 @@ class _ProcessMonitor:
 
             while self.busy:
                 try:
-                    # only print the data out every 10 seconds
-                    if datetime.now().second / 10 == 0:
-                        info = self._get_info()
+                    info = self._get_info()
+                    output.debug(info)
 
-                        output.debug(info)
-                    else:
-                        # call get_mem so that we record peak more accurately
-                        self._get_mem()
-
-                    time.sleep(1)
+                    time.sleep(5)
                 except Exception:
                     output.debug_exception()
 
@@ -324,16 +319,23 @@ class _ProcessMonitor:
         from yawast.external.memory_size import Size
 
         # prime the call to cpu_percent, as the first call doesn't return useful data
-        self.process.cpu_percent(interval=1)
+        self.process.cpu_percent()
+
+        # force a collection; not ideal, but seems to help
+        gc.collect(2)
 
         # use oneshot() to cache the data, so we minimize hits
         with self.process.oneshot():
             pct = self.process.cpu_percent()
 
             times = self.process.cpu_times()
-            mem = self._get_mem()
+            mem = self.process.memory_info()
             mem_res = "{0:cM}".format(Size(mem.rss))
             mem_virt = "{0:cM}".format(Size(mem.vms))
+
+            if mem.rss > self.peak_mem_res:
+                self.peak_mem_res = mem.rss
+                output.debug(f"New high-memory threshold: {self.peak_mem_res}")
 
             thr = self.process.num_threads()
 
@@ -361,19 +363,11 @@ class _ProcessMonitor:
             f"User: {times.user} - Res: {mem_res} - Virt: {mem_virt} - "
             f"Available: {mem_avail}/{mem_total} - Threads: {thr} - "
             f"Connections: {cons} - CPU Freq: "
-            f"{int(cpu_freq.current)}MHz/{int(cpu_freq.max)}MHz"
+            f"{int(cpu_freq.current)}MHz/{int(cpu_freq.max)}MHz - "
+            f"GC Objects: {len(gc.get_objects())}"
         )
 
         return info
-
-    def _get_mem(self):
-        mem = self.process.memory_info()
-
-        if mem.rss > self.peak_mem_res:
-            self.peak_mem_res = mem.rss
-            output.debug(f"New high-memory threshold: {self.peak_mem_res}")
-
-        return mem
 
     def __enter__(self):
         self.busy = True
