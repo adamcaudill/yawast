@@ -22,20 +22,10 @@ jobs:
         python-version: 3.7
 
     - name: Install dependencies
-      if: runner.os != 'Windows'
       run: |
         python -m pip install --upgrade pip
         python -m pip install pipx
         python -m pipx ensurepath
-
-    - name: Install dependencies (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        python --version
-        python -m pip install --upgrade pip
-        python -m pip install pipx
-        python -m pipx ensurepath
-      shell: cmd
 
     - name: Install with pipx (Linux)
       if: runner.os == 'Linux'
@@ -69,8 +59,7 @@ jobs:
     - name: Run version (Windows)
       if: runner.os == 'Windows'
       run: |
-        set PATH=%USERPROFILE%\.local\bin;%PATH%
-        yawast version
+        %USERPROFILE%\.local\bin\yawast version
       shell: cmd
 
     - name: Run version (macOS)
