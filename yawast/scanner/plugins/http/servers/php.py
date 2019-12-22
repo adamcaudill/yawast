@@ -10,10 +10,10 @@ from packaging import version
 from requests import Response
 
 from yawast.reporting.enums import Vulnerabilities
-from yawast.scanner.session import Session
 from yawast.scanner.plugins.evidence import Evidence
 from yawast.scanner.plugins.http import version_checker
 from yawast.scanner.plugins.result import Result
+from yawast.scanner.session import Session
 from yawast.shared import network
 
 

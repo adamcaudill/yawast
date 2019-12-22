@@ -3,8 +3,7 @@
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
 import base64
-import typing
-from typing import List, Dict
+from typing import List, Dict, cast
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -117,7 +116,7 @@ def get_alt_names(cert: x509.Certificate) -> List[str]:
     for ext in cert.extensions:
         # SUBJECT_ALTERNATIVE_NAME
         if ext.oid.dotted_string == "2.5.29.17":
-            ext = typing.cast(x509.SubjectAlternativeName, ext)
+            ext = cast(x509.SubjectAlternativeName, ext)
 
             return ext.value.get_values_for_type(x509.DNSName)
 

@@ -7,7 +7,6 @@ from typing import Union, List, Dict, Any
 
 from yawast.reporting.enums import Vulnerabilities
 from yawast.scanner.plugins.evidence import Evidence
-from yawast.shared import output
 
 
 class Result:

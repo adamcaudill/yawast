@@ -47,7 +47,7 @@ def check_for_jira(session: Session) -> Tuple[List[Result], Union[str, None]]:
                     build = re.search(build_pattern, res.text).group(1)
 
                     ver_str = f"v{version}-{build}"
-                except:
+                except Exception:
                     output.debug_exception()
 
                 results.append(

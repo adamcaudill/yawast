@@ -21,8 +21,8 @@ from yawast.scanner.plugins.http import (
     error_checker,
     response_scanner,
 )
-from yawast.scanner.plugins.http.applications.generic import password_reset
 from yawast.scanner.plugins.http.applications import wordpress, jira
+from yawast.scanner.plugins.http.applications.generic import password_reset
 from yawast.scanner.plugins.http.applications.generic.password_reset import (
     PasswordResetElementNotFound,
 )

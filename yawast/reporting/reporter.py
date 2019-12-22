@@ -10,7 +10,6 @@ import time
 import zipfile
 from datetime import datetime
 from typing import Dict, List, cast, Optional, Any, Union
-from zipfile import ZipFile
 
 from yawast.external.memory_size import Size
 from yawast.external.total_size import total_size
@@ -80,7 +79,7 @@ def save_output(spinner=None):
     json_data = json.dumps(data, indent=4)
 
     try:
-        zf = ZipFile(f"{_output_file}.zip", "x", zipfile.ZIP_BZIP2)
+        zf = zipfile.ZipFile(f"{_output_file}.zip", "x", zipfile.ZIP_BZIP2)
 
         with ExecutionTimer() as tm:
             zf.writestr(

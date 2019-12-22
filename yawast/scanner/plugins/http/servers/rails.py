@@ -6,7 +6,6 @@ import re
 from typing import List
 
 from yawast.reporting.enums import Vulnerabilities
-from yawast.scanner.plugins.http import response_scanner
 from yawast.scanner.plugins.result import Result
 from yawast.shared import network, output
 

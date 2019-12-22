@@ -2,9 +2,9 @@
 # License: MIT
 # Copyright: Raymond Hettinger
 
-from sys import getsizeof
-from itertools import chain
 from collections import deque
+from itertools import chain
+from sys import getsizeof
 
 try:
     from reprlib import repr
