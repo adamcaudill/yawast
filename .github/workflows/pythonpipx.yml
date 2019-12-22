@@ -31,21 +31,20 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         source ~/.profile
-        pipx install --python python3.7 yawast --verbose
+        pipx install --verbose --python python3.7 yawast
       shell: bash {0}
 
     - name: Install with pipx (Windows)
       if: runner.os == 'Windows'
       run: |
-        set PATH="C:\Users\runneradmin\.local\bin;%PATH%"
-        $Env:Path
-        pipx install --python python3.7 yawast --verbose
+        Get-ChildItem Env:
+        pipx install --verbose --python python3.7 yawast
 
     - name: Install with pipx (macOS)
       if: runner.os == 'macOS'
       run: |
         export PATH=$PATH:/Users/runner/.local/bin
-        pipx install --python python3.7 yawast --verbose
+        pipx install --verbose --python python3.7 yawast
       shell: bash {0}
 
     - name: Run version (Linux)
@@ -58,8 +57,7 @@ jobs:
     - name: Run version (Windows)
       if: runner.os == 'Windows'
       run: |
-        set PATH="C:\Users\runneradmin\.local\bin;%PATH%"
-        yawast version
+        C:\Users\runneradmin\.local\bin\yawast version
 
     - name: Run version (macOS)
       if: runner.os == 'macOS'
