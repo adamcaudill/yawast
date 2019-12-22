@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install --user pipx
+        python -m pip install pipx
         python -m pipx ensurepath
 
     - name: Install with pipx (Linux)
@@ -39,6 +39,7 @@ jobs:
       run: |
         set PATH=%USERPROFILE%\.local\bin;%PATH%
         echo %PATH%
+        where python3.7
         pipx install --verbose --python python3.7 yawast
       shell: cmd
 
