@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install pipx
+        python -m pip install --user pipx
         python -m pipx ensurepath
 
     - name: Install with pipx (Linux)
@@ -37,7 +37,6 @@ jobs:
     - name: Install with pipx (Windows)
       if: runner.os == 'Windows'
       run: |
-        Get-ChildItem Env:
         pipx install --verbose --python python3.7 yawast
 
     - name: Install with pipx (macOS)
