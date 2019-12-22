@@ -38,7 +38,7 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         set PATH="C:\Users\runneradmin\.local\bin;%PATH%"
-        echo %PATH%
+        $Env:Path
         pipx install --python python3.7 yawast --verbose
 
     - name: Install with pipx (macOS)
