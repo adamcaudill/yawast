@@ -5,6 +5,7 @@
 import secrets
 from difflib import SequenceMatcher
 from http import cookiejar
+from multiprocessing import Lock
 from typing import Dict, Union, Tuple, Optional
 from typing import cast
 from urllib.parse import urlparse, urljoin
@@ -28,6 +29,7 @@ YAWAST_UA = (
 )
 
 SERVICE_UA = f"YAWAST/{get_version()}/PY"
+_lock = Lock()
 
 
 # class to block setting cookies from server responses
@@ -41,7 +43,7 @@ _file_not_found_handling: Dict[str, Dict[str, Union[bool, Response]]] = {}
 
 
 def init(proxy: str, cookie: str, header: str) -> None:
-    global _requester
+    global _requester, _file_not_found_handling
 
     _requester.cookies.set_policy(_BlockCookiesSet())
     _requester.mount(
@@ -107,6 +109,8 @@ def init(proxy: str, cookie: str, header: str) -> None:
             output.error(
                 f"Invalid header specified ({header}) - header must be in NAME=VALUE format. Ignored."
             )
+
+    _file_not_found_handling = {}
 
 
 def reset():
@@ -277,7 +281,8 @@ def http_file_exists(
             # we have good HEAD handling - we will start with head, as it's more efficient for us
             head = http_head(url, allow_redirects=allow_redirects, timeout=timeout)
 
-            if head.status_code == 200:
+            # check for ok, and for server-side errors
+            if head.status_code == 200 or head.status_code >= 500:
                 # file exists, grab it
                 get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
 
@@ -345,6 +350,11 @@ def http_file_exists(
             get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
 
             return get.status_code == 200, get
+        else:
+            # shrug
+            get = http_get(url, allow_redirects=allow_redirects, timeout=timeout)
+
+            return get.status_code == 200, get
 
 
 def http_build_raw_response(res: Response) -> str:
@@ -407,28 +417,29 @@ def check_404_response(url: str) -> Tuple[bool, Response, bool, Response]:
 
 
 def _get_404_handling(domain: str, url: str):
-    if domain not in _file_not_found_handling:
-        _file_not_found_handling[domain] = {}
+    with _lock:
+        if domain not in _file_not_found_handling:
+            _file_not_found_handling[domain] = {}
 
-        target = utils.extract_url(url)
+            target = utils.extract_url(url)
 
-        rnd = secrets.token_hex(12)
-        file_url = urljoin(target, f"{rnd}.html")
-        path_url = urljoin(target, f"{rnd}/")
+            rnd = secrets.token_hex(12)
+            file_url = urljoin(target, f"{rnd}.html")
+            path_url = urljoin(target, f"{rnd}/")
 
-        file_res = http_get(file_url, False)
-        path_res = http_get(path_url, False)
+            file_res = http_get(file_url, False)
+            path_res = http_get(path_url, False)
 
-        _file_not_found_handling[domain]["file"] = file_res.status_code == 404
-        _file_not_found_handling[domain]["file_res"] = file_res
-        _file_not_found_handling[domain]["path"] = path_res.status_code == 404
-        _file_not_found_handling[domain]["path_res"] = path_res
+            _file_not_found_handling[domain]["file"] = file_res.status_code == 404
+            _file_not_found_handling[domain]["file_res"] = file_res
+            _file_not_found_handling[domain]["path"] = path_res.status_code == 404
+            _file_not_found_handling[domain]["path_res"] = path_res
 
-        # check to see if HEAD returns something reasonable
-        head_res = http_head(file_url, False)
+            # check to see if HEAD returns something reasonable
+            head_res = http_head(file_url, False)
 
-        _file_not_found_handling[domain]["head"] = head_res.status_code == 404
-        _file_not_found_handling[domain]["head_res"] = head_res
+            _file_not_found_handling[domain]["head"] = head_res.status_code == 404
+            _file_not_found_handling[domain]["head_res"] = head_res
 
 
 def check_ssl_redirect(url):

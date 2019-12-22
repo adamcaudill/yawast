@@ -537,13 +537,19 @@ class TestHttpBasic(TestCase):
         self.assertTrue(any("Nginx Outdated" in r.message for r in res))
 
     def test_wp_path_disc_nix(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
         url = "http://example.com/"
 
         with requests_mock.Mocker() as m:
+            m.get(requests_mock.ANY, status_code=404)
+            m.head(requests_mock.ANY, status_code=404)
             m.get(
-                requests_mock.ANY,
+                f"{url}wp-content/plugins/akismet/akismet.php",
                 text="<b>Fatal error</b>:  x y() in <b>/home/akismet.php</b> on line <b>32</b><br />",
+                status_code=500,
             )
+            m.head(f"{url}wp-content/plugins/akismet/akismet.php", status_code=500)
 
             res = wordpress.check_path_disclosure(url)
 
@@ -551,13 +557,19 @@ class TestHttpBasic(TestCase):
         self.assertTrue(any("/home/akismet.php" in r.message for r in res))
 
     def test_wp_path_disc_win(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
         url = "http://example.com/"
 
         with requests_mock.Mocker() as m:
+            m.get(requests_mock.ANY, status_code=404)
+            m.head(requests_mock.ANY, status_code=404)
             m.get(
-                requests_mock.ANY,
+                f"{url}wp-content/plugins/akismet/akismet.php",
                 text="<b>Fatal error</b>:  x y() in <b>C:\\home\\akismet.php</b> on line <b>32</b><br />",
+                status_code=500,
             )
+            m.head(f"{url}wp-content/plugins/akismet/akismet.php", status_code=500)
 
             res = wordpress.check_path_disclosure(url)
 
@@ -565,6 +577,8 @@ class TestHttpBasic(TestCase):
         self.assertTrue(any("C:\\home\\akismet.php" in r.message for r in res))
 
     def test_wp_path_disc_none_err(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
         url = "http://example.com/"
 
         with requests_mock.Mocker() as m:
@@ -572,6 +586,7 @@ class TestHttpBasic(TestCase):
                 requests_mock.ANY,
                 text="<b>Fatal error</b>:  x y() in /home/akismet.php on line 32",
             )
+            m.head(requests_mock.ANY)
 
             res = wordpress.check_path_disclosure(url)
 
@@ -580,10 +595,13 @@ class TestHttpBasic(TestCase):
         )
 
     def test_wp_path_disc_none(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
         url = "http://example.com/"
 
         with requests_mock.Mocker() as m:
             m.get(requests_mock.ANY, text="hello world")
+            m.head(requests_mock.ANY)
 
             res = wordpress.check_path_disclosure(url)
 
@@ -592,20 +610,34 @@ class TestHttpBasic(TestCase):
         )
 
     def test_php_find_info(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
         url = "http://example.com/"
 
         with requests_mock.Mocker() as m:
-            m.get(requests_mock.ANY, text='</a><h1 class="p">PHP Version 4.4.1</h1>')
+            m.get(requests_mock.ANY, status_code=404)
+            m.head(requests_mock.ANY, status_code=404)
+            m.get(f"{url}phpinfo.php", text='</a><h1 class="p">PHP Version 4.4.1</h1>')
+            m.head(f"{url}phpinfo.php", status_code=200)
 
             res = php.find_phpinfo([url])
 
         self.assertTrue(any("PHP Info Found" in r.message for r in res))
 
     def test_php_find_info_none(self):
+        network.init("", "", "")
+        output.setup(False, False, False)
         url = "http://example.com/"
 
         with requests_mock.Mocker() as m:
-            m.get(requests_mock.ANY, text="</a><h1>PHP Version 4.4.1</h1>")
+            m.get(requests_mock.ANY, status_code=404)
+            m.head(requests_mock.ANY, status_code=404)
+            m.get(
+                f"{url}phpinfo.php",
+                text="</a><h1>PHP Version 4.4.1</h1>",
+                status_code=500,
+            )
+            m.head(f"{url}phpinfo.php", status_code=200)
 
             res = php.find_phpinfo([url])
 
@@ -705,8 +737,10 @@ class TestHttpBasic(TestCase):
             with requests_mock.Mocker() as m:
                 m.get(requests_mock.ANY, text="not found", status_code=404)
                 m.get(f"{url}test/readme.html", text="body", status_code=200)
+                m.get(f"{url}test/readme.html~", text="body", status_code=200)
                 m.head(requests_mock.ANY, status_code=404)
                 m.head(f"{url}test/readme.html", status_code=200)
+                m.head(f"{url}test/readme.html~", status_code=200)
 
                 try:
                     http.reset()
@@ -958,8 +992,10 @@ class TestHttpBasic(TestCase):
             output.setup(False, True, True)
             with utils.capture_sys_output() as (stdout, stderr):
                 with requests_mock.Mocker() as m:
-                    m.get(requests_mock.ANY, content=b"\0\0\0\1Bud1\0", status_code=200)
-                    m.head(requests_mock.ANY, status_code=200)
+                    m.get(requests_mock.ANY, status_code=404)
+                    m.head(requests_mock.ANY, status_code=404)
+                    m.get(f"{url}.DS_Store", content=b"\0\0\0\1Bud1\0", status_code=200)
+                    m.head(f"{url}.DS_Store", status_code=200)
 
                     results = file_search.find_ds_store([url])
         except Exception as error:
