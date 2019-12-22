@@ -40,7 +40,6 @@ jobs:
         set PATH="C:\Users\runneradmin\.local\bin;%PATH%"
         echo %PATH%
         pipx install --python python3.7 yawast --verbose
-      shell: bash {0}
 
     - name: Install with pipx (macOS)
       if: runner.os == 'macOS'
@@ -59,9 +58,8 @@ jobs:
     - name: Run version (Windows)
       if: runner.os == 'Windows'
       run: |
-        set PATH=C:\Users\runneradmin\.local\bin;%PATH%
+        set PATH="C:\Users\runneradmin\.local\bin;%PATH%"
         yawast version
-      shell: bash {0}
 
     - name: Run version (macOS)
       if: runner.os == 'macOS'
