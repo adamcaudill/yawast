@@ -46,6 +46,7 @@ def init(proxy: str, cookie: str, header: str) -> None:
     global _requester, _file_not_found_handling
 
     _requester.cookies.set_policy(_BlockCookiesSet())
+    _requester.verify = False
     _requester.mount(
         "http://",
         HTTPAdapter(
@@ -128,11 +129,7 @@ def http_head(
 
     headers = {"User-Agent": YAWAST_UA}
     res = _requester.head(
-        url,
-        headers=headers,
-        verify=False,
-        allow_redirects=allow_redirects,
-        timeout=timeout,
+        url, headers=headers, allow_redirects=allow_redirects, timeout=timeout
     )
 
     output.debug(
@@ -149,7 +146,7 @@ def http_options(url: str, timeout: Optional[int] = 30) -> Response:
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     headers = {"User-Agent": YAWAST_UA}
-    res = _requester.options(url, headers=headers, verify=False, timeout=timeout)
+    res = _requester.options(url, headers=headers, timeout=timeout)
 
     output.debug(
         f"{res.request.method}: {url} - completed ({res.status_code}) in "
@@ -175,11 +172,7 @@ def http_get(
         headers = {**headers, **additional_headers}
 
     res = _requester.get(
-        url,
-        headers=headers,
-        verify=False,
-        allow_redirects=allow_redirects,
-        timeout=timeout,
+        url, headers=headers, allow_redirects=allow_redirects, timeout=timeout
     )
 
     output.debug(
@@ -211,7 +204,6 @@ def http_put(
         url,
         data=data,
         headers=headers,
-        verify=False,
         allow_redirects=allow_redirects,
         timeout=timeout,
     )
@@ -240,7 +232,7 @@ def http_custom(
     if additional_headers is not None:
         headers = {**headers, **additional_headers}
 
-    res = _requester.request(verb, url, headers=headers, verify=False, timeout=timeout)
+    res = _requester.request(verb, url, headers=headers, timeout=timeout)
 
     output.debug(
         f"{res.request.method}: {url} - completed ({res.status_code}) in "
@@ -260,11 +252,7 @@ def http_json(
     headers = {"User-Agent": SERVICE_UA}
 
     res = _requester.get(
-        url,
-        headers=headers,
-        verify=False,
-        allow_redirects=allow_redirects,
-        timeout=timeout,
+        url, headers=headers, allow_redirects=allow_redirects, timeout=timeout
     )
     return res.json(), res.status_code
 
