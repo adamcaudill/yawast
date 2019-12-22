@@ -45,8 +45,6 @@ def init(output_file: Union[str, None] = None) -> None:
 
 
 def save_output(spinner=None):
-    global _issues, _info, _output_file, _data
-
     # add some extra debug data
     register_info("memsize_issues", total_size(_issues))
     register_info("memsize_info", total_size(_info))
@@ -105,8 +103,6 @@ def save_output(spinner=None):
 
 
 def get_output_file() -> str:
-    global _output_file
-
     if len(_output_file) > 0:
         return f"{_output_file}.zip"
     else:
@@ -114,7 +110,7 @@ def get_output_file() -> str:
 
 
 def setup(domain: str) -> None:
-    global _domain, _issues, _data
+    global _domain
 
     _domain = domain
 
@@ -129,8 +125,6 @@ def setup(domain: str) -> None:
 
 
 def is_registered(vuln: Vulnerabilities) -> bool:
-    global _issues, _domain
-
     if _issues is None:
         return False
     else:
@@ -144,15 +138,11 @@ def is_registered(vuln: Vulnerabilities) -> bool:
 
 
 def register_info(key: str, value: Any):
-    global _info, _output_file
-
     if _output_file is not None and len(_output_file) > 0:
         _info[key] = value
 
 
 def register_data(key: str, value: Any):
-    global _data, _output_file, _domain
-
     if _output_file is not None and len(_output_file) > 0:
         if _domain is not None:
             if _domain in _data:
@@ -165,8 +155,6 @@ def register_data(key: str, value: Any):
 
 
 def register_message(value: str, kind: str):
-    global _info, _output_file
-
     if _output_file is not None and len(_output_file) > 0:
         if "messages" not in _info:
             _info["messages"] = {}
@@ -178,8 +166,6 @@ def register_message(value: str, kind: str):
 
 
 def register(issue: Issue) -> None:
-    global _issues, _domain, _evidence
-
     # make sure the Dict for _domain exists - this shouldn't normally be an issue, but is for unit tests
     if _domain not in _issues:
         _issues[_domain] = {}
@@ -249,10 +235,10 @@ def display_results(results: List[Result], padding: Optional[str] = ""):
 
 
 def _register_data(data: Dict, key: str, value: Any):
-    if key in data and type(data[key]) is list and type(value) is list:
+    if key in data and isinstance(data[key], list) and isinstance(value, list):
         ls = cast(list, data[key])
         ls.extend(value)
-    elif key in data and type(data[key]) is dict and type(value) is dict:
+    elif key in data and isinstance(data[key], dict) and isinstance(value, dict):
         dt = cast(dict, data[key])
         dt.update(value)
     else:
@@ -263,10 +249,10 @@ def _convert_keys(dct: Dict) -> Dict:
     ret = {}
 
     for k, v in dct.items():
-        if type(k) is Vulnerabilities:
+        if isinstance(k, Vulnerabilities):
             k = k.name
 
-        if type(v) is dict:
+        if isinstance(v, dict):
             v = _convert_keys(v)
 
         try:

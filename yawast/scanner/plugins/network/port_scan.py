@@ -58,7 +58,7 @@ def _is_port_open(url: str, ip: str, rec, queue):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     connected = False
     try:
-        connected = sock.connect_ex((ip, port)) is 0
+        connected = sock.connect_ex((ip, port)) == 0
         sock.close()
     except Exception:
         # this shouldn't happen, but just in case

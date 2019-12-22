@@ -6,11 +6,6 @@ from collections import deque
 from itertools import chain
 from sys import getsizeof
 
-try:
-    from reprlib import repr
-except ImportError:
-    pass
-
 
 def total_size(o, handlers=None):
     """ Returns the approximate memory footprint an object and all of its contents.

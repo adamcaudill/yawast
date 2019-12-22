@@ -100,8 +100,6 @@ def is_printable_str(b: bytes) -> bool:
 
 
 def strip_ansi_str(val: str) -> str:
-    global ANSI_STRIP
-
     return ANSI_STRIP.sub("", val)
 
 

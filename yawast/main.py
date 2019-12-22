@@ -316,8 +316,6 @@ class _ProcessMonitor:
             self.busy = False
 
     def _get_info(self) -> str:
-        from yawast.external.memory_size import Size
-
         # prime the call to cpu_percent, as the first call doesn't return useful data
         self.process.cpu_percent()
 

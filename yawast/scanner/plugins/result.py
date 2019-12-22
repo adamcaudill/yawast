@@ -27,9 +27,9 @@ class Result:
         self.url = url
 
         if evidence is not None:
-            if type(evidence) is dict or type(evidence) is Evidence:
+            if isinstance(evidence, dict) or isinstance(evidence, Evidence):
                 self.evidence = evidence
-            elif type(evidence) is str:
+            elif isinstance(evidence, str):
                 # if the evidence is a string, lets tack on the message as an extra element
                 self.evidence = {"e": str(evidence), "message": msg}
             else:

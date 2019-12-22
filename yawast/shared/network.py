@@ -123,8 +123,6 @@ def reset():
 def http_head(
     url: str, allow_redirects: Optional[bool] = True, timeout: Optional[int] = 30
 ) -> Response:
-    global _requester
-
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     headers = {"User-Agent": YAWAST_UA}
@@ -141,8 +139,6 @@ def http_head(
 
 
 def http_options(url: str, timeout: Optional[int] = 30) -> Response:
-    global _requester
-
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     headers = {"User-Agent": YAWAST_UA}
@@ -162,9 +158,7 @@ def http_get(
     additional_headers: Union[None, Dict] = None,
     timeout: Optional[int] = 30,
 ) -> Response:
-
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    global _requester
 
     headers = {"User-Agent": YAWAST_UA}
 
@@ -191,9 +185,7 @@ def http_put(
     additional_headers: Union[None, Dict] = None,
     timeout: Optional[int] = 30,
 ) -> Response:
-
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    global _requester
 
     headers = {"User-Agent": YAWAST_UA}
 
@@ -223,9 +215,7 @@ def http_custom(
     additional_headers: Union[None, Dict] = None,
     timeout: Optional[int] = 30,
 ) -> Response:
-
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    global _requester
 
     headers = {"User-Agent": YAWAST_UA}
 
@@ -247,7 +237,6 @@ def http_json(
     url, allow_redirects=True, timeout: Optional[int] = 30
 ) -> Tuple[Dict, int]:
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    global _requester
 
     headers = {"User-Agent": SERVICE_UA}
 
@@ -380,7 +369,7 @@ def http_build_raw_response(res: Response) -> str:
 def http_build_raw_request(
     req: Union[Request, PreparedRequest, _RequestObjectProxy]
 ) -> str:
-    if type(req) is _RequestObjectProxy:
+    if isinstance(req, _RequestObjectProxy):
         req = req._request
 
     headers = "\r\n".join(f"{k}: {v}" for k, v in req.headers.items())

@@ -23,7 +23,7 @@ def get_latest_version(
 
         if package in _versions:
             # check the type of base_version, and parse as needed
-            if type(base_version) is version.Version:
+            if isinstance(base_version, version.Version):
                 base_version = ".".join(str(base_version).split(".")[0:2])
 
             if base_version in _versions[package]:
