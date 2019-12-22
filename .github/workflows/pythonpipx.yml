@@ -3,6 +3,8 @@ name: Python install with pipx
 on:
   schedule:
   - cron: 0 2 * * *
+  push:
+  pull_request:
 
 jobs:
   build:
@@ -26,14 +28,44 @@ jobs:
         python -m pip install pipx
         python -m pipx ensurepath
 
-    - name: Install with pipx
+    - name: Install with pipx (Linux)
+      if: runner.os == 'Linux'
       run: |
         source ~/.profile
         pipx install --python python3.7 yawast --verbose
       shell: bash {0}
 
-    - name: Run version
+    - name: Install with pipx (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          set PATH=C:\Users\runneradmin\.local\bin;%PATH%
+          pipx install --python python3.7 yawast --verbose
+        shell: bash {0}
+
+    - name: Install with pipx (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          export PATH=$PATH:/Users/runner/.local/bin
+          pipx install --python python3.7 yawast --verbose
+        shell: bash {0}
+
+    - name: Run version (Linux)
+      if: runner.os == 'Linux'
       run: |
         source ~/.profile
         yawast version
       shell: bash {0}
+
+    - name: Run version (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          set PATH=C:\Users\runneradmin\.local\bin;%PATH%
+          yawast version
+        shell: bash {0}
+
+    - name: Run version (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          export PATH=$PATH:/Users/runner/.local/bin
+          yawast version
+        shell: bash {0}
