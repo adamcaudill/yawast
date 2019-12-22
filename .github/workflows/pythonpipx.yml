@@ -4,7 +4,6 @@ on:
   schedule:
   - cron: 0 2 * * *
   push:
-  pull_request:
 
 jobs:
   build:
@@ -38,7 +37,8 @@ jobs:
     - name: Install with pipx (Windows)
       if: runner.os == 'Windows'
       run: |
-        set PATH=C:\Users\runneradmin\.local\bin;%PATH%
+        set PATH="C:\Users\runneradmin\.local\bin;%PATH%"
+        echo %PATH%
         pipx install --python python3.7 yawast --verbose
       shell: bash {0}
 
