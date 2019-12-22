@@ -16,6 +16,12 @@ from yawast.scanner.plugins.http import http_basic, response_scanner, file_searc
 from yawast.scanner.plugins.http.applications import wordpress, jira
 from yawast.scanner.plugins.http.response_scanner import _check_cache_headers
 from yawast.scanner.plugins.http.servers import rails, python, nginx, php, iis
+from yawast.scanner.plugins.http.special_files import (
+    check_special_files,
+    check_special_paths,
+)
+from yawast.scanner.plugins.http.spider import spider
+from yawast.scanner.plugins.http.waf import get_waf
 from yawast.scanner.session import Session
 from yawast.shared import network, output
 
@@ -1077,3 +1083,414 @@ class TestHttpBasic(TestCase):
         )
 
         network.reset()
+
+    def test_spider_single(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="<html><body><p>body</p></body></html>",
+                    status_code=200,
+                )
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    links, res = spider(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_spider_link(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="<html><body><p><a href='/'>link</a></p></body></html>",
+                    status_code=200,
+                )
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    links, res = spider(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_spider_logout(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="<html><body><p><a href='/'>logout</a></p></body></html>",
+                    status_code=200,
+                )
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    links, res = spider(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_spider_jpg(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="<html><body><p><a href='/file.jpg'>jpg</a></p></body></html>",
+                    status_code=200,
+                )
+                m.get(f"{url}file.jpg", content=b"\0\0\0", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    links, res = spider(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_spider_insecure(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="<html><body><p><a href='http://example.com/'>insecure</a></p></body></html>",
+                    status_code=200,
+                )
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    links, res = spider(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_spider_redirect(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="<html><body><p><a href='/redirect/'>redirect</a></p></body></html>",
+                    status_code=200,
+                )
+                m.get(f"{url}redirect/", status_code=301, headers={"Location": "/"})
+                m.head(requests_mock.ANY, status_code=200)
+                m.head(f"{url}redirect/", status_code=301, headers={"Location": "/"})
+
+                try:
+                    links, res = spider(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_special_files(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="not found", status_code=404)
+                m.get(f"{url}license.txt", status_code=200, text="license")
+                m.head(requests_mock.ANY, status_code=404)
+                m.head(f"{url}license.txt", status_code=200)
+
+                try:
+                    links, res = check_special_files(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_special_paths(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="not found", status_code=404)
+                m.get(f"{url}.git/index", status_code=200, text="git")
+                m.head(requests_mock.ANY, status_code=404)
+                m.head(f"{url}.git/index", status_code=200)
+
+                try:
+                    links, res = check_special_paths(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertIsNotNone(links)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_waf_cloudflare(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="not found",
+                    status_code=404,
+                    headers={"Server": "cloudflare"},
+                )
+                m.head(
+                    requests_mock.ANY, status_code=404, headers={"Server": "cloudflare"}
+                )
+
+                try:
+                    head = network.http_head(url)
+                    raw = network.http_build_raw_response(head)
+                    res = get_waf(head.headers, raw, url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_waf_incapsula(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(
+                    requests_mock.ANY,
+                    text="not found",
+                    status_code=404,
+                    headers={"X-CDN": "123"},
+                )
+                m.head(requests_mock.ANY, status_code=404, headers={"X-CDN": "123"})
+
+                try:
+                    head = network.http_head(url)
+                    raw = network.http_build_raw_response(head)
+                    res = get_waf(head.headers, raw, url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_all_200(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_redirect(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, status_code=301, headers={"Location": "/"})
+                m.head(requests_mock.ANY, status_code=301, headers={"Location": "/"})
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_bad_head(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=404)
+                m.head(requests_mock.ANY, status_code=500)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_all_401(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=401)
+                m.head(requests_mock.ANY, status_code=401)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_all_500(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=500)
+                m.head(requests_mock.ANY, status_code=500)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_all_200_bin(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+                m.get(url, content=b"\0\0\0\1\2\3\4", status_code=200)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_all_200_bin_all(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, content=b"\0\0\0\1\2\3\4", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+                m.get(url, content=b"\0\0\0\1\2\3\5", status_code=200)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_all_200_diff(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+                m.get(url, text="this is different", status_code=200)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_404_similar(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="Error", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+                m.get(url, text="Error1", status_code=200)
+
+                try:
+                    _, _ = network.http_file_exists(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
