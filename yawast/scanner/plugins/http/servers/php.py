@@ -1,6 +1,8 @@
 #  Copyright (c) 2013 - 2019 Adam Caudill and Contributors.
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
+
+import os
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List, cast, Tuple
@@ -80,7 +82,7 @@ def find_phpinfo(links: List[str]) -> List[Result]:
 
                 queue.append(turl)
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         f = {executor.submit(_get_resp, url): url for url in queue}
         for future in as_completed(f):
             url = f[future]

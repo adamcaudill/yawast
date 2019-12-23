@@ -129,7 +129,7 @@ def find_backups(links: List[str]) -> Tuple[List[str], List[Result]]:
                 if target not in process_queue:
                     process_queue.append(target)
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         f = {executor.submit(_get_resp, url): url for url in process_queue}
         for future in as_completed(f):
             url = f[future]
@@ -166,7 +166,7 @@ def find_ds_store(links: List[str]) -> List[Result]:
 
             queue.append(turl)
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         f = {executor.submit(_get_resp, url): url for url in queue}
         for future in as_completed(f):
             url = f[future]
