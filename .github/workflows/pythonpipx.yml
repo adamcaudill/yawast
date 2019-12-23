@@ -59,6 +59,7 @@ jobs:
     - name: Run version (Windows)
       if: runner.os == 'Windows'
       run: |
+        dir %USERPROFILE%\.local\bin
         %USERPROFILE%\.local\bin\yawast version
       shell: cmd
 
