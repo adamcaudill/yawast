@@ -143,7 +143,7 @@ setup(
     options={"build_exe": build_exe_options, "build_msi": bdist_msi_options},
     executables=[Executable("bin/yawast", base=None)],
     packages=find_packages(exclude=["tests"]),
-    entry_points={"console_scripts": ["yawast.__main__:main"]},
+    entry_points={"console_scripts": ["yawast = yawast.__main__:main"]},
     install_requires=get_install_reqs(),
     include_package_data=True,
     package_data={"yawast": ["resources/*"]},
