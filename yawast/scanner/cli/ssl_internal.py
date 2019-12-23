@@ -2,8 +2,7 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
-import typing
-from typing import List
+from typing import List, cast
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -52,9 +51,7 @@ def scan(session: Session):
             cinfo = scanner.run_scan_command(
                 server_info, certificate_info_plugin.CertificateInfoScanCommand()
             )
-            cinfo = typing.cast(
-                certificate_info_plugin.CertificateInfoScanResult, cinfo
-            )
+            cinfo = cast(certificate_info_plugin.CertificateInfoScanResult, cinfo)
 
             # print info on the server cert
             _get_leaf_cert_info(cinfo.verified_certificate_chain[0])
@@ -77,54 +74,42 @@ def scan(session: Session):
             sslv2 = scanner.run_scan_command(
                 server_info, openssl_cipher_suites_plugin.Sslv20ScanCommand()
             )
-            sslv2 = typing.cast(
-                openssl_cipher_suites_plugin.CipherSuiteScanResult, sslv2
-            )
+            sslv2 = cast(openssl_cipher_suites_plugin.CipherSuiteScanResult, sslv2)
 
             _get_suite_info("SSLv2", sslv2, session.url)
 
             sslv3 = scanner.run_scan_command(
                 server_info, openssl_cipher_suites_plugin.Sslv30ScanCommand()
             )
-            sslv3 = typing.cast(
-                openssl_cipher_suites_plugin.CipherSuiteScanResult, sslv3
-            )
+            sslv3 = cast(openssl_cipher_suites_plugin.CipherSuiteScanResult, sslv3)
 
             _get_suite_info("SSLv3", sslv3, session.url)
 
             tls10 = scanner.run_scan_command(
                 server_info, openssl_cipher_suites_plugin.Tlsv10ScanCommand()
             )
-            tls10 = typing.cast(
-                openssl_cipher_suites_plugin.CipherSuiteScanResult, tls10
-            )
+            tls10 = cast(openssl_cipher_suites_plugin.CipherSuiteScanResult, tls10)
 
             _get_suite_info("TLSv1.0", tls10, session.url)
 
             tls11 = scanner.run_scan_command(
                 server_info, openssl_cipher_suites_plugin.Tlsv11ScanCommand()
             )
-            tls11 = typing.cast(
-                openssl_cipher_suites_plugin.CipherSuiteScanResult, tls11
-            )
+            tls11 = cast(openssl_cipher_suites_plugin.CipherSuiteScanResult, tls11)
 
             _get_suite_info("TLSv1.1", tls11, session.url)
 
             tls12 = scanner.run_scan_command(
                 server_info, openssl_cipher_suites_plugin.Tlsv12ScanCommand()
             )
-            tls12 = typing.cast(
-                openssl_cipher_suites_plugin.CipherSuiteScanResult, tls12
-            )
+            tls12 = cast(openssl_cipher_suites_plugin.CipherSuiteScanResult, tls12)
 
             _get_suite_info("TLSv1.2", tls12, session.url)
 
             tls13 = scanner.run_scan_command(
                 server_info, openssl_cipher_suites_plugin.Tlsv13ScanCommand()
             )
-            tls13 = typing.cast(
-                openssl_cipher_suites_plugin.CipherSuiteScanResult, tls13
-            )
+            tls13 = cast(openssl_cipher_suites_plugin.CipherSuiteScanResult, tls13)
 
             _get_suite_info("TLSv1.3", tls13, session.url)
 
@@ -134,9 +119,7 @@ def scan(session: Session):
             compression = scanner.run_scan_command(
                 server_info, compression_plugin.CompressionScanCommand()
             )
-            compression = typing.cast(
-                compression_plugin.CompressionScanResult, compression
-            )
+            compression = cast(compression_plugin.CompressionScanResult, compression)
 
             if compression.compression_name is not None:
                 reporter.display(
@@ -152,9 +135,7 @@ def scan(session: Session):
             fallback = scanner.run_scan_command(
                 server_info, fallback_scsv_plugin.FallbackScsvScanCommand()
             )
-            fallback = typing.cast(
-                fallback_scsv_plugin.FallbackScsvScanResult, fallback
-            )
+            fallback = cast(fallback_scsv_plugin.FallbackScsvScanResult, fallback)
 
             if fallback.supports_fallback_scsv:
                 output.norm("\tDowngrade Prevention: Yes")
@@ -170,7 +151,7 @@ def scan(session: Session):
             heartbleed = scanner.run_scan_command(
                 server_info, heartbleed_plugin.HeartbleedScanCommand()
             )
-            heartbleed = typing.cast(heartbleed_plugin.HeartbleedScanResult, heartbleed)
+            heartbleed = cast(heartbleed_plugin.HeartbleedScanResult, heartbleed)
 
             if heartbleed.is_vulnerable_to_heartbleed:
                 reporter.display(
@@ -185,7 +166,7 @@ def scan(session: Session):
                 server_info,
                 openssl_ccs_injection_plugin.OpenSslCcsInjectionScanCommand(),
             )
-            openssl_ccs = typing.cast(
+            openssl_ccs = cast(
                 openssl_ccs_injection_plugin.OpenSslCcsInjectionScanResult, openssl_ccs
             )
 
@@ -204,9 +185,7 @@ def scan(session: Session):
                 server_info,
                 session_renegotiation_plugin.SessionRenegotiationScanCommand(),
             )
-            sr = typing.cast(
-                session_renegotiation_plugin.SessionRenegotiationScanResult, sr
-            )
+            sr = cast(session_renegotiation_plugin.SessionRenegotiationScanResult, sr)
 
             if sr.accepts_client_renegotiation:
                 output.norm(
@@ -221,7 +200,7 @@ def scan(session: Session):
                 server_info,
                 session_resumption_plugin.SessionResumptionSupportScanCommand(),
             )
-            resump = typing.cast(
+            resump = cast(
                 session_resumption_plugin.SessionResumptionSupportScanResult, resump
             )
 
@@ -238,7 +217,7 @@ def scan(session: Session):
             robot = scanner.run_scan_command(
                 server_info, robot_plugin.RobotScanCommand()
             )
-            robot = typing.cast(robot_plugin.RobotScanResult, robot)
+            robot = cast(robot_plugin.RobotScanResult, robot)
 
             if (
                 robot.robot_result_enum
@@ -270,7 +249,7 @@ def scan(session: Session):
             ed = scanner.run_scan_command(
                 server_info, early_data_plugin.EarlyDataScanCommand()
             )
-            ed = typing.cast(early_data_plugin.EarlyDataScanResult, ed)
+            ed = cast(early_data_plugin.EarlyDataScanResult, ed)
 
             if ed.is_early_data_supported:
                 output.info("\tTLS 1.3 0-RTT Support: Yes")

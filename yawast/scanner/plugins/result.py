@@ -7,7 +7,6 @@ from typing import Union, List, Dict, Any
 
 from yawast.reporting.enums import Vulnerabilities
 from yawast.scanner.plugins.evidence import Evidence
-from yawast.shared import output
 
 
 class Result:
@@ -28,9 +27,9 @@ class Result:
         self.url = url
 
         if evidence is not None:
-            if type(evidence) is dict or type(evidence) is Evidence:
+            if isinstance(evidence, dict) or isinstance(evidence, Evidence):
                 self.evidence = evidence
-            elif type(evidence) is str:
+            elif isinstance(evidence, str):
                 # if the evidence is a string, lets tack on the message as an extra element
                 self.evidence = {"e": str(evidence), "message": msg}
             else:
@@ -40,10 +39,6 @@ class Result:
             self.evidence = {"message": msg}
 
         self.id = uuid.uuid4().hex
-
-        output.debug(
-            f"Result Created: {self.id} - {self.vulnerability.name} - {self.url}"
-        )
 
     def __repr__(self):
         return f"Result: {self.id} - {self.vulnerability.name} - {self.url} - {self.message}"

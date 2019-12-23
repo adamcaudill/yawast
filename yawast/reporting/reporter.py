@@ -2,15 +2,17 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
+import gc
+import hashlib
 import json
 import os
 import time
 import zipfile
 from datetime import datetime
 from typing import Dict, List, cast, Optional, Any, Union
-from zipfile import ZipFile
 
 from yawast.external.memory_size import Size
+from yawast.external.total_size import total_size
 from yawast.reporting.enums import Vulnerabilities, Severity
 from yawast.reporting.issue import Issue
 from yawast.scanner.plugins.result import Result
@@ -20,6 +22,7 @@ from yawast.shared.exec_timer import ExecutionTimer
 _issues: Dict[str, Dict[Vulnerabilities, List[Issue]]] = {}
 _info: Dict[str, Any] = {}
 _data: Dict[str, Any] = {}
+_evidence: Dict[str, Any] = {}
 _domain: str = ""
 _output_file: str = ""
 
@@ -42,7 +45,13 @@ def init(output_file: Union[str, None] = None) -> None:
 
 
 def save_output(spinner=None):
-    global _issues, _info, _output_file, _data
+    # add some extra debug data
+    register_info("memsize_issues", total_size(_issues))
+    register_info("memsize_info", total_size(_info))
+    register_info("memsize_data", total_size(_data))
+    register_info("memsize_evidence", total_size(_evidence))
+    register_info("gc_stats", gc.get_stats())
+    register_info("gc_objects", len(gc.get_objects()))
 
     if spinner:
         spinner.stop()
@@ -62,12 +71,13 @@ def save_output(spinner=None):
         "_info": _convert_keys(_info),
         "data": _convert_keys(_data),
         "issues": _convert_keys(_issues),
+        "evidence": _convert_keys(_evidence),
         "vulnerabilities": vulns,
     }
-    json_data = json.dumps(data, sort_keys=True, indent=4)
+    json_data = json.dumps(data, indent=4)
 
     try:
-        zf = ZipFile(f"{_output_file}.zip", "x", zipfile.ZIP_BZIP2)
+        zf = zipfile.ZipFile(f"{_output_file}.zip", "x", zipfile.ZIP_BZIP2)
 
         with ExecutionTimer() as tm:
             zf.writestr(
@@ -93,8 +103,6 @@ def save_output(spinner=None):
 
 
 def get_output_file() -> str:
-    global _output_file
-
     if len(_output_file) > 0:
         return f"{_output_file}.zip"
     else:
@@ -102,7 +110,7 @@ def get_output_file() -> str:
 
 
 def setup(domain: str) -> None:
-    global _domain, _issues, _data
+    global _domain
 
     _domain = domain
 
@@ -112,10 +120,11 @@ def setup(domain: str) -> None:
     if _domain not in _data:
         _data[_domain] = {}
 
+    if _domain not in _evidence:
+        _evidence[_domain] = {}
+
 
 def is_registered(vuln: Vulnerabilities) -> bool:
-    global _issues, _domain
-
     if _issues is None:
         return False
     else:
@@ -129,15 +138,11 @@ def is_registered(vuln: Vulnerabilities) -> bool:
 
 
 def register_info(key: str, value: Any):
-    global _info, _output_file
-
     if _output_file is not None and len(_output_file) > 0:
         _info[key] = value
 
 
 def register_data(key: str, value: Any):
-    global _data, _output_file, _domain
-
     if _output_file is not None and len(_output_file) > 0:
         if _domain is not None:
             if _domain in _data:
@@ -150,8 +155,6 @@ def register_data(key: str, value: Any):
 
 
 def register_message(value: str, kind: str):
-    global _info, _output_file
-
     if _output_file is not None and len(_output_file) > 0:
         if "messages" not in _info:
             _info["messages"] = {}
@@ -163,11 +166,33 @@ def register_message(value: str, kind: str):
 
 
 def register(issue: Issue) -> None:
-    global _issues, _domain
-
     # make sure the Dict for _domain exists - this shouldn't normally be an issue, but is for unit tests
     if _domain not in _issues:
         _issues[_domain] = {}
+
+    # add the evidence to the evidence list, and swap the value in the object for its hash.
+    # the point of this is to minimize cases where we are holding the same (large) string
+    # multiple times in memory. should reduce memory by up to 20%
+    if _domain not in _evidence:
+        _evidence[_domain] = {}
+
+    if "request" in issue.evidence and issue.evidence["request"] is not None:
+        req = str(issue.evidence["request"]).encode("utf-8")
+        req_id = hashlib.blake2b(req, digest_size=16).hexdigest()
+
+        if req_id not in _evidence[_domain]:
+            _evidence[_domain][req_id] = issue.evidence["request"]
+
+        issue.evidence["request"] = req_id
+
+    if "response" in issue.evidence and issue.evidence["response"] is not None:
+        res = str(issue.evidence["response"]).encode("utf-8")
+        res_id = hashlib.blake2b(res, digest_size=16).hexdigest()
+
+        if res_id not in _evidence[_domain]:
+            _evidence[_domain][res_id] = issue.evidence["response"]
+
+        issue.evidence["response"] = res_id
 
     # if we haven't handled this issue yet, create a List for it
     if not is_registered(issue.vulnerability):
@@ -210,10 +235,10 @@ def display_results(results: List[Result], padding: Optional[str] = ""):
 
 
 def _register_data(data: Dict, key: str, value: Any):
-    if key in data and type(data[key]) is list and type(value) is list:
+    if key in data and isinstance(data[key], list) and isinstance(value, list):
         ls = cast(list, data[key])
         ls.extend(value)
-    elif key in data and type(data[key]) is dict and type(value) is dict:
+    elif key in data and isinstance(data[key], dict) and isinstance(value, dict):
         dt = cast(dict, data[key])
         dt.update(value)
     else:
@@ -224,10 +249,10 @@ def _convert_keys(dct: Dict) -> Dict:
     ret = {}
 
     for k, v in dct.items():
-        if type(k) is Vulnerabilities:
+        if isinstance(k, Vulnerabilities):
             k = k.name
 
-        if type(v) is dict:
+        if isinstance(v, dict):
             v = _convert_keys(v)
 
         try:

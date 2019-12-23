@@ -2,7 +2,6 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
-import inspect
 from typing import List, Union
 
 from bs4 import BeautifulSoup
@@ -10,7 +9,7 @@ from requests.models import Response
 
 from yawast.reporting.enums import Vulnerabilities
 from yawast.scanner.plugins.evidence import Evidence
-from yawast.scanner.plugins.http import http_basic, retirejs, error_checker, http_utils
+from yawast.scanner.plugins.http import http_basic, retirejs, error_checker
 from yawast.scanner.plugins.http.servers import rails, apache_tomcat, iis
 from yawast.scanner.plugins.result import Result
 from yawast.shared import network, output
@@ -27,7 +26,7 @@ def check_response(
 
     raw_full = network.http_build_raw_response(res)
 
-    if http_utils.is_text(res):
+    if network.response_body_is_text(res):
         body = res.text
 
         if soup is None:
@@ -44,10 +43,7 @@ def check_response(
     results += http_basic.get_header_issues(res, raw_full, url)
     results += http_basic.get_cookie_issues(res, url)
 
-    # this function will trigger a recursive call, as it calls this to check the response.
-    # to deal with this, we'll check the caller, to make sure it's not what we're about to call.
-    if "check_cve_2019_5418" not in inspect.stack()[1].function:
-        results += rails.check_cve_2019_5418(url)
+    results += rails.check_cve_2019_5418(url)
 
     results += _check_charset(url, res)
 

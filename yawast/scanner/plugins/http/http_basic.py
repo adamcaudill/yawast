@@ -296,7 +296,7 @@ def check_local_ip_disclosure(session: Session) -> List[Result]:
             "Accept: */*\r\n\r\n".format(user_agent=network.YAWAST_UA)
         )
 
-        if type(con) is SslConnection:
+        if isinstance(con, SslConnection):
             con.ssl_client.write(req.encode("utf_8"))
 
             res = http_response_parser.HttpResponseParser.parse_from_ssl_connection(
@@ -400,8 +400,6 @@ def get_cookie_issues(res: Response, url: str) -> List[Result]:
 
 
 def _get_cookie_issues(cookies: List[str], url: str, res: Response) -> List[Result]:
-    global _checked_cookies
-
     # setup the checked list
     if Vln.COOKIE_MISSING_SECURE_FLAG not in _checked_cookies:
         _checked_cookies[Vln.COOKIE_MISSING_SECURE_FLAG] = []

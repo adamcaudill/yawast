@@ -3,8 +3,7 @@
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
 import base64
-import typing
-from typing import List, Dict
+from typing import List, Dict, cast
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -30,37 +29,37 @@ def format_extensions(cert: x509.Certificate):
         ):
             data = ""
             for prop, value in vars(ext.value).items():
-                if type(value) is bytes:
+                if isinstance(value, bytes):
                     # convert byte strings to hex
 
                     value = value.hex()
-                elif type(value) is list:
+                elif isinstance(value, list):
                     # some values are lists of more values, these need special processing.
 
                     item_data = []
                     for item in value:
-                        if type(item) is x509.ObjectIdentifier:
+                        if isinstance(item, x509.ObjectIdentifier):
                             # if this is an OID, we only care about the name
 
                             if item._name != "Unknown OID":
                                 item_data.append(item._name)
                             else:
                                 item_data.append(item.dotted_string)
-                        elif type(item) is x509.PolicyInformation:
+                        elif isinstance(item, x509.PolicyInformation):
                             item_data.append(
                                 "policy_identifier={oid}, policy_qualifiers={pq}".format(
                                     oid=item.policy_identifier.dotted_string,
                                     pq=item.policy_qualifiers,
                                 )
                             )
-                        elif type(item) is x509.DistributionPoint:
+                        elif isinstance(item, x509.DistributionPoint):
                             points = []
 
                             for point in item.full_name:
                                 points.append(point.value)
 
                             item_data.append(" ".join(points).strip())
-                        elif type(item) is x509.AccessDescription:
+                        elif isinstance(item, x509.AccessDescription):
                             if item.access_method._name != "Unknown OID":
                                 name = item.access_method._name
                             else:
@@ -117,7 +116,7 @@ def get_alt_names(cert: x509.Certificate) -> List[str]:
     for ext in cert.extensions:
         # SUBJECT_ALTERNATIVE_NAME
         if ext.oid.dotted_string == "2.5.29.17":
-            ext = typing.cast(x509.SubjectAlternativeName, ext)
+            ext = cast(x509.SubjectAlternativeName, ext)
 
             return ext.value.get_values_for_type(x509.DNSName)
 

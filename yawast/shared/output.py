@@ -2,13 +2,12 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
-import inspect
 import logging
 import shutil
 import sys
 import textwrap
 import traceback
-from inspect import FrameInfo
+from inspect import FrameInfo, stack
 from multiprocessing.util import get_logger
 from threading import Lock
 from typing import cast, Optional
@@ -117,7 +116,7 @@ def debug(msg: str):
     global _init, _logger
 
     if _init:
-        fi = cast(FrameInfo, inspect.stack()[1])
+        fi = cast(FrameInfo, stack()[1])
         val = str(f"{fi.function}:{msg}")
 
         if _logger is not None:
@@ -189,7 +188,7 @@ def _print(val):
 
 class _LogHandler(logging.StreamHandler):
     def __init__(self):
-        logging.Handler.__init__(self)
+        logging.StreamHandler.__init__(self)
 
         self.stream = sys.stderr
 

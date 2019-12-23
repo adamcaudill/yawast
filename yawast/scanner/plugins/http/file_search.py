@@ -62,13 +62,15 @@ def find_backups(links: List[str]) -> Tuple[List[str], List[Result]]:
         except Exception:
             return ""
 
-    def _get_resp(url: str) -> Response:
-        return network.http_head(url, False)
+    def _get_resp(url: str) -> Tuple[bool, Response]:
+        return network.http_file_exists(url, False)
 
-    def _process(url: str, res: Response):
+    def _process(url: str, result: Tuple[bool, Response]):
         nonlocal results, new_links
 
-        if res.status_code == 200:
+        found, res = result
+
+        if found:
             # we found something!
             new_links.append(url)
 
@@ -95,7 +97,7 @@ def find_backups(links: List[str]) -> Tuple[List[str], List[Result]]:
         ".tmp",
         ".swp",
     ]
-    compressed = [".zip", ".tar.gz", ".gz", ".7z", ".tgz", ".rar"]
+    compressed = [".zip", ".tar.gz", ".gz", ".7z", ".tgz", ".rar", ".tar"]
 
     for link in links:
         # clean link of any junk
@@ -127,7 +129,7 @@ def find_backups(links: List[str]) -> Tuple[List[str], List[Result]]:
                 if target not in process_queue:
                     process_queue.append(target)
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         f = {executor.submit(_get_resp, url): url for url in process_queue}
         for future in as_completed(f):
             url = f[future]
@@ -141,13 +143,15 @@ def find_ds_store(links: List[str]) -> List[Result]:
     results = []
     queue = []
 
-    def _get_resp(url: str) -> Response:
-        return network.http_get(url, False)
+    def _get_resp(url: str) -> Tuple[bool, Response]:
+        return network.http_file_exists(url, False)
 
-    def _process(url: str, res: Response):
+    def _process(url: str, result: Tuple[bool, Response]):
         nonlocal results
 
-        if res.status_code == 200 and res.content.startswith(b"\0\0\0\1Bud1\0"):
+        found, res = result
+
+        if found and res.content.startswith(b"\0\0\0\1Bud1\0"):
             results.append(
                 Result.from_evidence(
                     Evidence.from_response(res),
@@ -162,7 +166,7 @@ def find_ds_store(links: List[str]) -> List[Result]:
 
             queue.append(turl)
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         f = {executor.submit(_get_resp, url): url for url in queue}
         for future in as_completed(f):
             url = f[future]
@@ -281,14 +285,11 @@ def _check_url(urls: List[str], queue, follow_redirections, recursive) -> None:
 
     for url in urls:
         try:
-            # get the HEAD first, we only really care about actual files
-            res = network.http_head(url, False)
+            found, res = network.http_file_exists(url, False)
 
             if res.status_code < 300:
                 # run a scan on the full result, so we can ensure that we get any issues
-                results += response_scanner.check_response(
-                    url, network.http_get(url, False)
-                )
+                results += response_scanner.check_response(url, res)
 
                 files.append(url)
 

@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from yawast.reporting.enums import Vulnerabilities
 from yawast.scanner.plugins.evidence import Evidence
-from yawast.scanner.plugins.http import response_scanner, http_utils
+from yawast.scanner.plugins.http import response_scanner
 from yawast.scanner.plugins.result import Result
 from yawast.shared import network, output
 
@@ -79,6 +79,7 @@ def spider(url) -> Tuple[List[str], List[Result]]:
     links = _links[:]
     _links = []
     _insecure = []
+    _tasks = []
 
     return links, results
 
@@ -112,7 +113,7 @@ def _get_links(base_url: str, urls: List[str], queue, pool):
             else:
                 length = len(res.content)
 
-            if http_utils.is_text(res) and length < max_length:
+            if network.response_body_is_text(res) and length < max_length:
                 soup = BeautifulSoup(res.text, "html.parser")
             else:
                 # no clue what this is
@@ -139,7 +140,7 @@ def _get_links(base_url: str, urls: List[str], queue, pool):
                                 _links.append(href)
 
                             # filter out some of the obvious binary files
-                            if file_ext is None or file_ext not in [
+                            if file_ext is None or str(file_ext).lower() not in [
                                 "gzip",
                                 "jpg",
                                 "jpeg",

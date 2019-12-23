@@ -93,13 +93,13 @@ def is_printable_str(b: bytes) -> bool:
 
     if good_decoder is not None:
         output.debug(f"Decoded string as {good_decoder} in {timer.to_ms()}ms")
+    else:
+        output.debug(f"Failed to decode string in {timer.to_ms()}ms")
 
     return printable
 
 
 def strip_ansi_str(val: str) -> str:
-    global ANSI_STRIP
-
     return ANSI_STRIP.sub("", val)
 
 

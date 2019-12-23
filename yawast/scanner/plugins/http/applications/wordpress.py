@@ -109,26 +109,28 @@ def check_path_disclosure(wp_url: str) -> List[Result]:
     for url in urls:
         target = urljoin(wp_url, url)
 
-        resp = network.http_get(target, False)
-        if resp.status_code < 300 or resp.status_code >= 500:
-            # we have some kind of response that could be useful
-            if "<b>Fatal error</b>:" in resp.text:
-                # we have an error
-                pattern = r"<b>((\/|[A-Z]:\\).*.php)<\/b>"
-                if re.search(pattern, resp.text):
-                    try:
-                        path = re.findall(pattern, resp.text)[0][0]
-                        results.append(
-                            Result.from_evidence(
-                                Evidence.from_response(resp, {"path": path}),
-                                f"WordPress File Path Disclosure: {target} ({path})",
-                                Vulnerabilities.APP_WORDPRESS_PATH_DISCLOSURE,
+        head = network.http_head(target, False)
+        if head.status_code != 404:
+            resp = network.http_get(target, False)
+            if resp.status_code < 300 or resp.status_code >= 500:
+                # we have some kind of response that could be useful
+                if "<b>Fatal error</b>:" in resp.text:
+                    # we have an error
+                    pattern = r"<b>((\/|[A-Z]:\\).*.php)<\/b>"
+                    if re.search(pattern, resp.text):
+                        try:
+                            path = re.findall(pattern, resp.text)[0][0]
+                            results.append(
+                                Result.from_evidence(
+                                    Evidence.from_response(resp, {"path": path}),
+                                    f"WordPress File Path Disclosure: {target} ({path})",
+                                    Vulnerabilities.APP_WORDPRESS_PATH_DISCLOSURE,
+                                )
                             )
-                        )
-                    except Exception:
-                        output.debug_exception()
+                        except Exception:
+                            output.debug_exception()
 
-        results += response_scanner.check_response(target, resp)
+            results += response_scanner.check_response(target, resp)
 
     return results
 
