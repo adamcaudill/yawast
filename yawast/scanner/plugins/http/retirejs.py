@@ -87,9 +87,10 @@ def _get_retirejs_results(
 
     if _data is not None:
         # get all the JS files
-        files = [i.get("src") for i in soup.find_all("script") if i.get("src")]
+        elements = [i for i in soup.find_all("script") if i.get("src")]
 
-        for file in files:
+        for element in elements:
+            file = element.get("src")
             # fix relative URLs
             if str(file).startswith("//"):
                 file = f"https:{file}"
@@ -108,11 +109,25 @@ def _get_retirejs_results(
                     # external JS file
                     results.append(
                         Result.from_evidence(
-                            Evidence.from_response(res, {"js_file": file}),
+                            Evidence.from_response(
+                                res, {"js_file": file, "element": str(element)}
+                            ),
                             f"External JavaScript File: {file}",
                             Vulnerabilities.JS_EXTERNAL_FILE,
                         )
                     )
+
+                    # we have an external script; check for SRI
+                    if not element.get("integrity"):
+                        results.append(
+                            Result.from_evidence(
+                                Evidence.from_response(
+                                    res, {"js_file": file, "element": str(element)}
+                                ),
+                                f"External JavaScript Without SRI: {file}",
+                                Vulnerabilities.JS_EXTERNAL_NO_SRI,
+                            )
+                        )
 
                 for find in findings:
                     issues.append((file, find))

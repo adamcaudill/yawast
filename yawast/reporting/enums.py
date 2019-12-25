@@ -98,6 +98,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     JS_EXTERNAL_FILE = VulnerabilityInfo.create(
         "Js_External_File", Severity.LOW, "", True
     )
+    JS_EXTERNAL_NO_SRI = VulnerabilityInfo.create(
+        "Js_External_No_SRI", Severity.LOW, "", True
+    )
 
     HTTP_BANNER_GENERIC_APACHE = VulnerabilityInfo.create(
         "Http_Banner_Generic_Apache", Severity.INFO, ""
