@@ -98,6 +98,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     JS_EXTERNAL_FILE = VulnerabilityInfo.create(
         "Js_External_File", Severity.LOW, "", True
     )
+    JS_EXTERNAL_NO_SRI = VulnerabilityInfo.create(
+        "Js_External_No_SRI", Severity.LOW, "", True
+    )
 
     HTTP_BANNER_GENERIC_APACHE = VulnerabilityInfo.create(
         "Http_Banner_Generic_Apache", Severity.INFO, ""
@@ -195,6 +198,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     )
     HTTP_HEADER_EXPIRES_MISSING = VulnerabilityInfo.create(
         "Http_Header_Expires_Missing", Severity.LOW, ""
+    )
+    HTTP_HEADER_EXPIRES_FUTURE = VulnerabilityInfo.create(
+        "Http_Header_Expires_Future", Severity.LOW, ""
     )
     HTTP_HEADER_PRAGMA_NO_CACHE_MISSING = VulnerabilityInfo.create(
         "Http_Header_Pragma_No_Cache_Missing", Severity.LOW, ""

@@ -2,9 +2,12 @@
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
+from datetime import datetime
 from typing import List, Union
 
 from bs4 import BeautifulSoup
+from dateutil import tz
+from dateutil.parser import parse
 from requests.models import Response
 
 from yawast.reporting.enums import Vulnerabilities
@@ -144,10 +147,23 @@ def _check_cache_headers(url: str, res: Response) -> List[Result]:
                     Vulnerabilities.HTTP_HEADER_EXPIRES_MISSING,
                 )
             )
-
         else:
-            # TODO: parse the value and see if it's less than now
-            pass
+            # parse the date, and check to see if it's in the past
+            try:
+                # using fuzzy=true here could lead to some false positives due to it doing whatever it can to produce
+                # a valid date - but it is the most forgiving option we have to ensure odd servers don't cause issues
+                dt = parse(res.headers["Expires"], fuzzy=True)
+                if dt > datetime.now(tz.UTC):
+                    # Expires is in the future - it's an issue
+                    results.append(
+                        Result.from_evidence(
+                            Evidence.from_response(res),
+                            f"Expires Header - Future Dated ({res.headers['Expires']}): {url}",
+                            Vulnerabilities.HTTP_HEADER_EXPIRES_FUTURE,
+                        )
+                    )
+            except Exception:
+                output.debug_exception()
 
         if "Pragma" not in res.headers or "no-cache" not in str(res.headers["Pragma"]):
             results.append(

@@ -31,6 +31,7 @@ selenium = "*"
 setuptools = "*"
 ordered-set = "*"
 requirementslib = "*"
+python-dateutil = "*"
 
 [requires]
 python_version = "3.7"

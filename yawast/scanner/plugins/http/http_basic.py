@@ -189,13 +189,16 @@ def get_header_issues(res: Response, raw: str, url: str) -> List[Result]:
 
                         if dup_name == header_name and dup != raw_header:
                             # we have a second header, with a different value
-                            results.append(
-                                Result.from_evidence(
-                                    Evidence.from_response(res),
-                                    f"Header {header_name} set multiple times with different values at {url}",
-                                    Vln.HTTP_HEADER_DUPLICATE,
+                            # before we report this as an issue, we first need to see if this is one of the headers
+                            # that are often sent more than once. we don't want to create a lot of noise with this
+                            if str(dup_name).lower() not in ["set-cookie", "link"]:
+                                results.append(
+                                    Result.from_evidence(
+                                        Evidence.from_response(res),
+                                        f"Header {header_name} set multiple times with different values at {url}",
+                                        Vln.HTTP_HEADER_DUPLICATE,
+                                    )
                                 )
-                            )
 
                             break
     except Exception:
