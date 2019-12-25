@@ -6,7 +6,7 @@ permalink: /checks/
 
 ### Checks Performed
 
-The following checks are performed:
+The following checks are performed; please note, this may not include all checks performed by YAWAST, but is an overview.
 
 * *(Generic)* User Enumeration via Password Reset Form Response Differences
 * *(Generic)* User Enumeration via Password Reset Form Timing Differences
@@ -26,6 +26,7 @@ The following checks are performed:
 * *(Generic)* X-XSS-Protection disabled header present
 * *(Generic)* SSL: HSTS not enabled
 * *(Generic)* Duplicate HTTP Headers
+* *(Generic)* Missing Cache Control Headers
 * *(Generic)* Source Control: Common source control directories present
 * *(Generic)* Presence of crossdomain.xml or clientaccesspolicy.xml
 * *(Generic)* Presence of sitemap.xml
@@ -36,6 +37,7 @@ The following checks are performed:
 * *(Generic)* Presence of license.txt
 * *(Generic)* Missing cookie flags (Secure, HttpOnly, and SameSite)
 * *(Generic)* Cookies with SameSite=None flag
+* *(Generic)* External JavaScript Lacks SRI
 * *(Generic)* Search for 14,405 common files (via `--files`) & 21,332 common directories (via `--dir`)
 * *(Generic)* Common backup files
 * *(Generic)* Presence of .DS_Store files
@@ -76,6 +78,7 @@ The following checks are performed:
 * *(ASP.NET)* Presence of Elmah.axd
 * *(ASP.NET)* Debugging Enabled
 * *(ASP.NET)* Outdated version
+* *(ASP.NET)* Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled
 * *(BigIP)* Internal IP address disclosure
 * *(PHP)* Info Disclosure: PHP version
 * *(PHP)* Outdated version
