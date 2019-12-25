@@ -1,5 +1,6 @@
 ## 0.11.0 - In Development
 
+* [#192](https://github.com/adamcaudill/yawast/issues/192) - Check for Missing Cache Control Headers 
 * [#306](https://github.com/adamcaudill/yawast/issues/306) - External JavaScript Lacks SRI
 * [#308](https://github.com/adamcaudill/yawast/issues/308) - Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled
 * [#312](https://github.com/adamcaudill/yawast/issues/312) - Make JSON Storage More Efficient

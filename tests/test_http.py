@@ -414,7 +414,7 @@ class TestHttpBasic(TestCase):
         self.assertTrue(any("Expires Header Not Found" in r.message for r in res))
         self.assertTrue(any("Pragma: no-cache Not Found" in r.message for r in res))
 
-    def test_cache_headers_expires(self):
+    def test_cache_headers_expires_invalid(self):
         url = "http://example.com"
 
         with requests_mock.Mocker() as m:
@@ -425,6 +425,40 @@ class TestHttpBasic(TestCase):
         res = _check_cache_headers(url, resp)
 
         self.assertFalse(any("Expires Header Not Found" in r.message for r in res))
+
+    def test_cache_headers_expires_future(self):
+        url = "http://example.com"
+
+        with requests_mock.Mocker() as m:
+            m.get(
+                url,
+                text="body",
+                headers={"Expires": "Expires: Wed, 21 Oct 2099 07:28:00 GMT"},
+            )
+
+            resp = requests.get(url)
+
+        res = _check_cache_headers(url, resp)
+
+        self.assertFalse(any("Expires Header Not Found" in r.message for r in res))
+        self.assertTrue(any("Expires Header - Future Dated" in r.message for r in res))
+
+    def test_cache_headers_expires_past(self):
+        url = "http://example.com"
+
+        with requests_mock.Mocker() as m:
+            m.get(
+                url,
+                text="body",
+                headers={"Expires": "Expires: Wed, 21 Oct 2015 07:28:00 GMT"},
+            )
+
+            resp = requests.get(url)
+
+        res = _check_cache_headers(url, resp)
+
+        self.assertFalse(any("Expires Header Not Found" in r.message for r in res))
+        self.assertFalse(any("Expires Header - Future Dated" in r.message for r in res))
 
     def test_cache_headers_pragma(self):
         url = "http://example.com"

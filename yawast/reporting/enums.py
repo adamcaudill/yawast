@@ -199,6 +199,9 @@ class Vulnerabilities(VulnerabilityInfoEnum):
     HTTP_HEADER_EXPIRES_MISSING = VulnerabilityInfo.create(
         "Http_Header_Expires_Missing", Severity.LOW, ""
     )
+    HTTP_HEADER_EXPIRES_FUTURE = VulnerabilityInfo.create(
+        "Http_Header_Expires_Future", Severity.LOW, ""
+    )
     HTTP_HEADER_PRAGMA_NO_CACHE_MISSING = VulnerabilityInfo.create(
         "Http_Header_Pragma_No_Cache_Missing", Severity.LOW, ""
     )
