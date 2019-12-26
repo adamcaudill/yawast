@@ -24,7 +24,8 @@ The following checks are performed; please note, this may not include all checks
 * *(Generic)* Referrer-Policy header not present
 * *(Generic)* Feature-Policy header not present
 * *(Generic)* X-XSS-Protection disabled header present
-* *(Generic)* SSL: HSTS not enabled
+* *(Generic)* HSTS Header Not Sent
+* *(Generic)* HSTS Preload Status (Chrome, Firefox, Tor) - via HSTSPreload.com
 * *(Generic)* Duplicate HTTP Headers
 * *(Generic)* Missing Cache Control Headers
 * *(Generic)* Source Control: Common source control directories present

@@ -10,10 +10,12 @@ from typing import List, Dict, Union, Tuple
 from urllib.parse import urlparse
 
 from nassl.ssl_client import OpenSslVersionEnum
+from publicsuffixlist import PublicSuffixList
 from requests.models import Response
 from sslyze import server_connectivity_tester
 from sslyze.utils import ssl_connection_configurator, http_response_parser
 from sslyze.utils.ssl_connection import SslConnection
+from validator_collection import checkers
 
 from yawast.reporting.enums import Vulnerabilities as Vln
 from yawast.scanner.plugins.evidence import Evidence
@@ -285,6 +287,25 @@ def check_options(url: str) -> List[Result]:
         )
 
     results += response_scanner.check_response(url, res)
+
+    return results
+
+
+def check_hsts_preload(url: str) -> List[dict]:
+    hsts_service = "https://hstspreload.com/api/v1/status/"
+    results: List[dict] = []
+
+    domain = utils.get_domain(url)
+
+    if not checkers.is_ip_address(domain):
+        while domain.count(".") > 0:
+            # get the HSTS preload status for the domain
+            res, _ = network.http_json(f"{hsts_service}{domain}")
+            results.append(res)
+
+            domain = domain.split(".", 1)[-1]
+            if PublicSuffixList().is_public(domain):
+                break
 
     return results
 

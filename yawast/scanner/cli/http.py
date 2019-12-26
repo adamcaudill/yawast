@@ -74,6 +74,22 @@ def scan(session: Session):
         reporter.display_results(res, "\t")
         output.empty()
 
+    # check the HSTS preload status
+    results = http_basic.check_hsts_preload(session.url)
+    if len(results) > 0:
+        reporter.register_data("hsts_preload_status", results)
+
+        output.norm("HSTS Preload Status:")
+        for result in results:
+            chrome = result["chrome"] is not None
+            firefox = result["firefox"] is not None
+            tor = result["tor"] is not None
+
+            output.norm(
+                f"\t({result['domain']}) Chrome: {chrome}\tFirefox: {firefox}\tTor: {tor}"
+            )
+        output.empty()
+
     output.norm("Performing vulnerability scan (this will take a while)...")
 
     links: List[str] = []
