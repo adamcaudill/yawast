@@ -57,7 +57,7 @@ def is_private_ip(val):
     return ipaddress.ip_address(str(val)).is_private
 
 
-def get_domain(val):
+def get_domain(val: str) -> str:
     val = str(val)
     val = urlparse(extract_url(val)).netloc
 

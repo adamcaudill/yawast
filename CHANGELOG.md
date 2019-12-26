@@ -1,5 +1,6 @@
 ## 0.11.0 - In Development
 
+* [#181](https://github.com/adamcaudill/yawast/issues/181) - HSTS Preload Checking (via HSTSPreload.com API) 
 * [#192](https://github.com/adamcaudill/yawast/issues/192) - Check for Missing Cache Control Headers 
 * [#306](https://github.com/adamcaudill/yawast/issues/306) - External JavaScript Lacks SRI
 * [#308](https://github.com/adamcaudill/yawast/issues/308) - Telerik UI for ASP.NET AJAX RadAsyncUpload Enabled
