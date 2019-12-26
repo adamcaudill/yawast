@@ -82,6 +82,7 @@ def check_version(url: str) -> List[Result]:
     results += _check_version_404(url)
     results += _check_version_verb(url)
     results += _check_version_post(url)
+    results += _check_version_406(url)
 
     return results
 
@@ -312,6 +313,8 @@ def _check_version_404(url: str) -> List[Result]:
 
         if res.status_code > 400:
             results += get_version(target, res, "404 Error Message")
+
+        results += response_scanner.check_response(res.url, res)
     except Exception:
         output.debug_exception()
 
@@ -326,6 +329,8 @@ def _check_version_verb(url: str) -> List[Result]:
 
         if res.status_code > 400:
             results += get_version(url, res, "Invalid HTTP Verb")
+
+        results += response_scanner.check_response(res.url, res)
     except Exception:
         output.debug_exception()
 
@@ -340,6 +345,26 @@ def _check_version_post(url: str) -> List[Result]:
 
         if res.status_code > 400:
             results += get_version(url, res, "POST to root")
+
+        results += response_scanner.check_response(res.url, res)
+    except Exception:
+        output.debug_exception()
+
+    return results
+
+
+def _check_version_406(url: str) -> List[Result]:
+    results: List[Result] = []
+
+    try:
+        res = network.http_get(
+            url, False, {"Accept": "application/pkcs8", "Accept-Encoding": "*;q=0"}
+        )
+
+        if res.status_code > 400:
+            results += get_version(url, res, "Unacceptable Accept")
+
+        results += response_scanner.check_response(res.url, res)
     except Exception:
         output.debug_exception()
 

@@ -1,5 +1,6 @@
 ## 0.11.0 - In Development
 
+* [#164](https://github.com/adamcaudill/yawast/issues/164) - Apache Tomcat Version Detection via 406 Not Acceptable
 * [#181](https://github.com/adamcaudill/yawast/issues/181) - HSTS Preload Checking (via HSTSPreload.com API) 
 * [#192](https://github.com/adamcaudill/yawast/issues/192) - Check for Missing Cache Control Headers 
 * [#306](https://github.com/adamcaudill/yawast/issues/306) - External JavaScript Lacks SRI

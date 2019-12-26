@@ -64,6 +64,7 @@ The following checks are performed; please note, this may not include all checks
 * *(Apache Tomcat)* Tomcat Host Manager Weak Password
 * *(Apache Tomcat)* Tomcat version detection via invalid HTTP verb
 * *(Apache Tomcat)* Tomcat version detection via File Not Found
+* *(Apache Tomcat)* Tomcat version detection via 406 Not Acceptable
 * *(Apache Tomcat)* Tomcat PUT RCE (CVE-2017-12617)
 * *(Apache Tomcat)* Tomcat Windows RCE (CVE-2019-0232)
 * *(Apache Tomcat)* Outdated version
