@@ -87,8 +87,6 @@ def spider(url) -> Tuple[List[str], List[Result]]:
 def _get_links(base_url: str, urls: List[str], queue, pool):
     global _links, _insecure, _tasks, _lock
 
-    max_length = 1024 * 1024 * 3  # 3MB
-
     results: List[Result] = []
 
     # fail-safe to make sure we don't go too crazy
@@ -107,13 +105,7 @@ def _get_links(base_url: str, urls: List[str], queue, pool):
 
             res = network.http_get(url, False)
 
-            # get the length, so that we don't parse huge documents
-            if "Content-Length" in res.headers:
-                length = int(res.headers["Content-Length"])
-            else:
-                length = len(res.content)
-
-            if network.response_body_is_text(res) and length < max_length:
+            if network.response_body_is_text(res):
                 soup = BeautifulSoup(res.text, "html.parser")
             else:
                 # no clue what this is
@@ -150,6 +142,9 @@ def _get_links(base_url: str, urls: List[str], queue, pool):
                                 "exe",
                                 "gz",
                                 "pdf",
+                                "iso",
+                                "pkg",
+                                "dmg",
                             ]:
                                 if not _is_unsafe_link(href, link.string):
                                     to_process.append(href)
