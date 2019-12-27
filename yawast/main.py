@@ -171,7 +171,11 @@ def _shutdown():
 
     output.empty()
 
-    output.norm(f"Completed (Elapsed: {str(elapsed)} - Peak Memory: {mem_res})")
+    if _monitor.peak_mem_res > 0:
+        output.norm(f"Completed (Elapsed: {str(elapsed)} - Peak Memory: {mem_res})")
+    else:
+        # if we don't have memory info - likely not running in a terminal, don't print junk
+        output.norm(f"Completed (Elapsed: {str(elapsed)})")
 
     if reporter.get_output_file() != "":
         with Spinner() as spinner:

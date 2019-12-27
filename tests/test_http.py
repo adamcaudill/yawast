@@ -15,7 +15,14 @@ from yawast.scanner.cli import http
 from yawast.scanner.plugins.http import http_basic, response_scanner, file_search
 from yawast.scanner.plugins.http.applications import wordpress, jira
 from yawast.scanner.plugins.http.response_scanner import _check_cache_headers
-from yawast.scanner.plugins.http.servers import rails, python, nginx, php, iis
+from yawast.scanner.plugins.http.servers import (
+    rails,
+    python,
+    nginx,
+    php,
+    iis,
+    apache_tomcat,
+)
 from yawast.scanner.plugins.http.special_files import (
     check_special_files,
     check_special_paths,
@@ -1525,6 +1532,26 @@ class TestHttpBasic(TestCase):
                 except Exception as error:
                     self.assertIsNone(error)
 
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
+    def test_tomcat_version(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.get(requests_mock.ANY, text="body", status_code=500)
+                m.post(requests_mock.ANY, text="body", status_code=500)
+                m.head(requests_mock.ANY, status_code=500)
+
+                try:
+                    res = apache_tomcat.check_version(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
             self.assertNotIn("Exception", stderr.getvalue())
             self.assertNotIn("Error", stderr.getvalue())
 
