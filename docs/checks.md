@@ -49,6 +49,7 @@ The following checks are performed; please note, this may not include all checks
 * *(Generic)* Content-Type header missing
 * *(Generic)* Insecure links
 * *(Generic)* Internal IP address exposed
+* *(Generic)* Enumeration of HTTP methods
 * *(Generic)* Common open ports (via `--ports`)
 * *(JavaScript)* Vulnerable libraries used (via RetireJS)
 * *(JavaScript)* Third-party scripts used

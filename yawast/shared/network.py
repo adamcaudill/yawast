@@ -158,6 +158,8 @@ def http_get(
     additional_headers: Union[None, Dict] = None,
     timeout: Optional[int] = 30,
 ) -> Response:
+    max_size = 5 * 1024 * 1024  # 5MB
+    chunk_size = 10 * 1024  # 10KB - this is the default used by requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     headers = {"User-Agent": YAWAST_UA}
@@ -166,8 +168,34 @@ def http_get(
         headers = {**headers, **additional_headers}
 
     res = _requester.get(
-        url, headers=headers, allow_redirects=allow_redirects, timeout=timeout
+        url,
+        headers=headers,
+        allow_redirects=allow_redirects,
+        timeout=timeout,
+        stream=True,
     )
+
+    # if we have a content-length use that first, as it'll be a faster check
+    if (
+        "content-length" in res.headers
+        and int(res.headers["content-length"]) > max_size
+    ):
+        raise ValueError(f"File '{url}' exceeds the maximum size of {max_size} bytes.")
+
+    length = 0
+    content = bytes()
+
+    for chunk in res.iter_content(chunk_size):
+        length += len(chunk)
+        content += chunk
+
+        if length > max_size:
+            raise ValueError(
+                f"File '{url}' exceeds the maximum size of {max_size} bytes."
+            )
+
+    # hack: set the Response's content directly, as it doesn't keep it in memory if you stream the data
+    res._content = content
 
     output.debug(
         f"{res.request.method}: {url} - completed ({res.status_code}) in "

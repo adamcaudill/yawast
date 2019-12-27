@@ -29,7 +29,7 @@ def check_response(
 
     raw_full = network.http_build_raw_response(res)
 
-    if network.response_body_is_text(res):
+    if soup or network.response_body_is_text(res):
         body = res.text
 
         if soup is None:
@@ -46,8 +46,11 @@ def check_response(
     results += http_basic.get_header_issues(res, raw_full, url)
     results += http_basic.get_cookie_issues(res, url)
 
-    results += rails.check_cve_2019_5418(url)
+    # only check for this if we have a good response - no point in doing this for errors
+    if res.status_code < 400:
+        results += rails.check_cve_2019_5418(url)
 
+    # we perform this check even if the response isn't text as this also covers missing content-type
     results += _check_charset(url, res)
 
     return results

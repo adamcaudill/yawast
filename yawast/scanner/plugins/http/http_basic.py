@@ -6,9 +6,10 @@ import re
 import socket
 import struct
 from http.client import HTTPResponse
-from typing import List, Dict, Union, Tuple
+from typing import List, Dict, Union, Tuple, Optional
 from urllib.parse import urlparse
 
+import pkg_resources
 from nassl.ssl_client import OpenSslVersionEnum
 from publicsuffixlist import PublicSuffixList
 from requests.models import Response
@@ -289,6 +290,39 @@ def check_options(url: str) -> List[Result]:
     results += response_scanner.check_response(url, res)
 
     return results
+
+
+def check_http_methods(
+    url: str, path: Optional[str] = None
+) -> Tuple[List[str], List[Result]]:
+    results: List[Result] = []
+    supported_methods: List[str] = []
+
+    # before we start, we should test an invalid verb, to see if it will accept anything
+    res = network.http_custom("XINVALIDX", url)
+    results += response_scanner.check_response(url, res)
+
+    if res.status_code < 405:
+        # no point in continuing, it'll return as if everything is supported, which is just noise
+        return supported_methods, results
+
+    if path is None:
+        file_path = pkg_resources.resource_filename(
+            "yawast", "resources/http-protocol-methods.txt"
+        )
+    else:
+        file_path = path
+
+    with open(file_path) as file:
+        for line in file:
+            res = network.http_custom(line, url)
+
+            if res.status_code < 405:
+                supported_methods.append(line)
+
+            results += response_scanner.check_response(url, res)
+
+    return supported_methods, results
 
 
 def check_hsts_preload(url: str) -> List[dict]:

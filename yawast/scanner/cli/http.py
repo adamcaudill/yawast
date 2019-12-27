@@ -86,8 +86,25 @@ def scan(session: Session):
             tor = result["tor"] is not None
 
             output.norm(
-                f"\t({result['domain']}) Chrome: {chrome}\tFirefox: {firefox}\tTor: {tor}"
+                f"\t({result['domain']}) Chrome: {chrome}\tFirefox: {firefox}\t\tTor: {tor}"
             )
+        output.empty()
+
+    methods, res = http_basic.check_http_methods(session.url)
+    if len(methods) == 0:
+        output.norm("Server responds to invalid HTTP methods - check skipped.")
+    else:
+        reporter.register_data({"http_methods_supported": methods})
+
+        output.norm("Supported HTTP methods:")
+
+        for method in methods:
+            output.norm(f"\t{method}")
+
+    output.empty()
+
+    if res:
+        reporter.display_results(res, "\t")
         output.empty()
 
     output.norm("Performing vulnerability scan (this will take a while)...")

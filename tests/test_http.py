@@ -1555,6 +1555,27 @@ class TestHttpBasic(TestCase):
             self.assertNotIn("Exception", stderr.getvalue())
             self.assertNotIn("Error", stderr.getvalue())
 
+    def test_http_methods_good(self):
+        network.init("", "", "")
+        url = "https://adamcaudill.com/"
+
+        output.setup(False, False, False)
+        with utils.capture_sys_output() as (stdout, stderr):
+            with requests_mock.Mocker() as m:
+                m.register_uri(requests_mock.ANY, requests_mock.ANY, status_code=405)
+                m.get(requests_mock.ANY, text="body", status_code=200)
+                m.post(requests_mock.ANY, text="body", status_code=200)
+                m.head(requests_mock.ANY, status_code=200)
+
+                try:
+                    methods, res = http_basic.check_http_methods(url)
+                except Exception as error:
+                    self.assertIsNone(error)
+
+            self.assertIsNotNone(res)
+            self.assertNotIn("Exception", stderr.getvalue())
+            self.assertNotIn("Error", stderr.getvalue())
+
     def test_hsts_preload_status(self):
         network.init("", "", "")
         url = "https://www.google.com/"

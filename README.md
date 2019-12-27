@@ -52,3 +52,4 @@ Information on development standards, and guidelines for issues are available in
 
 * [BSI AppSec](https://www.appsecconsulting.com/) - Generously providing time to improve this tool.
 * [SecLists](https://github.com/danielmiessler/SecLists) - Various lists are based on the resources collected by this project.
+* [FuzzDB Project](https://github.com/fuzzdb-project) - Various lists are based on the resources collected by this project.
