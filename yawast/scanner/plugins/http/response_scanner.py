@@ -29,7 +29,7 @@ def check_response(
 
     raw_full = network.http_build_raw_response(res)
 
-    if network.response_body_is_text(res):
+    if soup or network.response_body_is_text(res):
         body = res.text
 
         if soup is None:
