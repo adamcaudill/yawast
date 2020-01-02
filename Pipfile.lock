@@ -384,10 +384,10 @@
         },
         "validator-collection": {
             "hashes": [
-                "sha256:c0f99730a27880add58eb4c42c215b9a21febf1725ebe28d8167ae451d9847d5"
+                "sha256:6e800bb5e8fb886d69a6b1a3850867760c061ae90a77ade496042da925ddd533"
             ],
             "index": "pypi",
-            "version": "==1.4.0"
+            "version": "==1.4.1"
         },
         "vistir": {
             "hashes": [
