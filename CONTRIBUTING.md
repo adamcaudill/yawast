@@ -73,7 +73,7 @@ It is not required of you to assign the copyright of your contributions; you ret
 All Python files (except those in the `yawast\external` directory) should include the following header:
 
 ```
-# Copyright (c) 2013 - 2019 Adam Caudill and Contributors.
+# Copyright (c) 2013 - 2020 Adam Caudill and Contributors.
 # This file is part of YAWAST which is released under the MIT license.
 # See the LICENSE file or go to https://yawast.org/license/ for full license details.
 ```

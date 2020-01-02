@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 - 2019 Adam Caudill and Contributors.
+#  Copyright (c) 2013 - 2020 Adam Caudill and Contributors.
 #  This file is part of YAWAST which is released under the MIT license.
 #  See the LICENSE file or go to https://yawast.org/license/ for full license details.
 
@@ -115,7 +115,7 @@ def print_header():
     print()
     print(f"The YAWAST Antecedent Web Application Security Toolkit (v{get_version()})")
     print(
-        " Copyright (c) 2013-2019 Adam Caudill <adam@adamcaudill.com> and Contributors"
+        " Copyright (c) 2013 - 2020 Adam Caudill <adam@adamcaudill.com> and Contributors"
     )
     print(" Support & Documentation: https://yawast.org")
     print(" News & Updates: https://twitter.com/yawast")
