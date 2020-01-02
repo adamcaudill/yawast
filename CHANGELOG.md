@@ -1,4 +1,4 @@
-## 0.11.0 - In Development
+## 0.11.0 - 2020-01-02
 
 * [#164](https://github.com/adamcaudill/yawast/issues/164) - Apache Tomcat Version Detection via 406 Not Acceptable
 * [#181](https://github.com/adamcaudill/yawast/issues/181) - HSTS Preload Checking (via HSTSPreload.com API) 
