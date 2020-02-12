@@ -34,4 +34,4 @@ Based on the popularity of Python and the poll indicating that being written in 
 
 ### Does YAWAST receive financial support?
 
-No. While the core contributor's employer has allowed some time to be used to improve YAWAST, YAWAST does not receive financial support from any company or from donations. The majority of work on YAWAST is performed on personal time, and all expenses are covered by the core contributors personally.
+No.
