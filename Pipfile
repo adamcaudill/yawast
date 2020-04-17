@@ -14,7 +14,7 @@ black = "==19.3b0"
 yawast = {editable = true,path = "."}
 sslyze = "==2.1.4"
 requests-mock = "*"
-jsonschema = "~=2.6"
+jsonschema = "~=3.2"
 validator-collection = "*"
 requests = "*"
 publicsuffixlist = "*"
