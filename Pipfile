@@ -9,7 +9,6 @@ coverage = "*"
 cx_Freeze = {git = "https://github.com/anthony-tuininga/cx_Freeze.git"}
 wheel = "*"
 black = "==19.3b0"
-requirementslib = "*"
 
 [packages]
 yawast = {editable = true,path = "."}
@@ -30,7 +29,6 @@ psutil = "*"
 selenium = "*"
 setuptools = "*"
 ordered-set = "*"
-requirementslib = "*"
 python-dateutil = "*"
 
 [requires]

@@ -9,7 +9,6 @@ from os import path
 from pathlib import Path
 from typing import List, Union, Tuple
 
-from requirementslib import Lockfile
 from setuptools import find_packages
 
 if "build_exe" in sys.argv:
@@ -115,13 +114,18 @@ def get_long_description():
 
 
 def get_install_reqs():
-    try:
-        lf = Lockfile.load(root_path)
+    import json
 
-        return lf.requirements_list
-    except AttributeError:
-        # if it fails, return an empty list - lock file likely missing
-        return []
+    file = path.join(root_path, "Pipfile.lock")
+    with open(file) as fd:
+        lock_data = json.load(fd)
+        install_requires = [
+            package_name + package_data["version"]
+            for package_name, package_data in lock_data["default"].items()
+            if "version" in package_data
+        ]
+
+    return install_requires
 
 
 setup(
