@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  target-branch: develop
+  ignore:
+  - dependency-name: coverage
+    versions:
+    - "5.4"
+  - dependency-name: mypy
+    versions:
+    - "0.800"
+  - dependency-name: packaging
+    versions:
+    - "20.8"
+  - dependency-name: requests-mock
+    versions:
+    - 1.8.0
